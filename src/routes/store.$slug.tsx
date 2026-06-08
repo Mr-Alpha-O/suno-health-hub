@@ -72,7 +72,7 @@ function ProductPage() {
           <div className="mt-8">
             <h3 className="font-extrabold text-lg mb-3">المميزات</h3>
             <ul className="space-y-2">
-              {p.details.map((d) => (
+              {p.details.map((d: string) => (
                 <li key={d} className="flex items-center gap-2 text-foreground">
                   <CheckCircle2 className="h-5 w-5 text-primary" /> {d}
                 </li>
