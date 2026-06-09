@@ -20,10 +20,15 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const iconMap = [Stethoscope, HeartPulse, Activity, Microscope, Pill, Ambulance];
+const iconMap = {
+  nursing: HeartPulse,
+  doctor: Stethoscope,
+  lab: Microscope,
+  ambulance: Ambulance,
+  equipment: Package,
+} as const;
 
 function Index() {
-  const featured = services.slice(0, 9);
   return (
     <>
       {/* HERO */}
