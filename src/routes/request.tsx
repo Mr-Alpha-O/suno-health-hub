@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Send } from "lucide-react";
-import { services, site, waLink } from "@/lib/site";
+import { Send, Sparkles } from "lucide-react";
+import { serviceCategories, OTHER_CATEGORY, site, waLink } from "@/lib/site";
 import { z } from "zod";
 
 export const Route = createFileRoute("/request")({
   head: () => ({
     meta: [
       { title: "اطلب خدمة | سونو للخدمات الطبية" },
-      { name: "description", content: "اطلب خدمة طبية منزلية من سونو. املأ النموذج وسنتواصل معك خلال دقائق." },
+      { name: "description", content: "اطلب خدمة طبية منزلية من سونو. اختر الفئة ثم الخدمة وسنتواصل معك خلال دقائق." },
       { property: "og:title", content: "اطلب خدمة | سونو" },
       { property: "og:description", content: "خدمة طبية منزلية بطلب واحد." },
     ],
@@ -19,18 +19,40 @@ export const Route = createFileRoute("/request")({
   component: RequestPage,
 });
 
+const OTHER = "أخرى";
+
 const schema = z.object({
   name: z.string().trim().min(2, "الاسم مطلوب").max(80),
   phone: z.string().trim().regex(/^[0-9+\s-]{8,20}$/, "رقم الهاتف غير صحيح"),
   address: z.string().trim().min(4, "العنوان مطلوب").max(200),
-  service: z.string().min(1, "اختر الخدمة"),
+  category: z.string().min(1, "اختر الفئة الرئيسية"),
+  subService: z.string().min(1, "اختر الخدمة"),
+  otherService: z.string().trim().max(200).optional(),
   notes: z.string().max(800).optional(),
 });
 
 function RequestPage() {
   const { service: initialService } = Route.useSearch();
-  const [form, setForm] = useState({ name: "", phone: "", address: "", service: initialService || "", notes: "" });
+  const initialCategory =
+    serviceCategories.find((c) => c.slug === initialService)?.slug ?? "";
+
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    category: initialCategory,
+    subService: "",
+    otherService: "",
+    notes: "",
+  });
   const [loading, setLoading] = useState(false);
+
+  const selectedCategory = useMemo(
+    () => serviceCategories.find((c) => c.slug === form.category),
+    [form.category],
+  );
+  const isOtherCategory = form.category === OTHER_CATEGORY.slug;
+  const isOtherSub = form.subService === OTHER || isOtherCategory;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,14 +61,35 @@ function RequestPage() {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    if (isOtherSub && !form.otherService.trim()) {
+      toast.error("يرجى كتابة الخدمة المطلوبة");
+      return;
+    }
     setLoading(true);
-    const svcName = services.find((s) => s.slug === form.service)?.name ?? form.service;
-    const msg = `طلب خدمة جديد:%0A• الاسم: ${form.name}%0A• الهاتف: ${form.phone}%0A• العنوان: ${form.address}%0A• الخدمة: ${svcName}%0A• ملاحظات: ${form.notes || "—"}`;
+
+    const categoryName = isOtherCategory
+      ? OTHER_CATEGORY.name
+      : selectedCategory?.name ?? form.category;
+    const subName = isOtherCategory ? "—" : form.subService;
+
+    const lines = [
+      "🩺 طلب خدمة جديد من موقع سونو",
+      "—————————————",
+      `• الاسم: ${form.name}`,
+      `• رقم الهاتف: ${form.phone}`,
+      `• العنوان: ${form.address}`,
+      `• القسم الرئيسي: ${categoryName}`,
+      `• الخدمة المطلوبة: ${subName}`,
+    ];
+    if (isOtherSub) lines.push(`• الخدمة المكتوبة من العميل: ${form.otherService}`);
+    lines.push(`• ملاحظات العميل: ${form.notes || "—"}`);
+
+    const msg = lines.join("\n");
     toast.success("تم إرسال طلبك! سنتواصل معك خلال دقائق.");
     setTimeout(() => {
-      window.open(`https://wa.me/${site.whatsapp}?text=${msg}`, "_blank");
+      window.open(`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
       setLoading(false);
-      setForm({ name: "", phone: "", address: "", service: "", notes: "" });
+      setForm({ name: "", phone: "", address: "", category: "", subService: "", otherService: "", notes: "" });
     }, 600);
   };
 
@@ -68,16 +111,59 @@ function RequestPage() {
             <Field label="رقم الهاتف *">
               <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} dir="ltr" className={inp} placeholder="01XXXXXXXXX" />
             </Field>
-            <Field label="نوع الخدمة *">
-              <select value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} className={inp}>
-                <option value="">اختر الخدمة</option>
-                {services.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+            <Field label="العنوان *">
+              <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className={inp} placeholder="المنطقة، الشارع، رقم المبنى" />
+            </Field>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-5">
+            <Field label="القسم الرئيسي *">
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value, subService: "", otherService: "" })}
+                className={inp}
+              >
+                <option value="">اختر القسم</option>
+                {serviceCategories.map((c) => (
+                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                ))}
+                <option value={OTHER_CATEGORY.slug}>{OTHER_CATEGORY.name}</option>
+              </select>
+            </Field>
+            <Field label="الخدمة المطلوبة *">
+              <select
+                value={form.subService}
+                onChange={(e) => setForm({ ...form, subService: e.target.value })}
+                className={inp}
+                disabled={!form.category || isOtherCategory}
+              >
+                <option value="">
+                  {isOtherCategory ? "اكتب الخدمة بالأسفل" : form.category ? "اختر الخدمة" : "اختر القسم أولاً"}
+                </option>
+                {selectedCategory?.subs.map((s) => (
+                  <option key={s.name} value={s.name}>
+                    {s.name}{s.featured ? " ⭐" : ""}
+                  </option>
+                ))}
               </select>
             </Field>
           </div>
-          <Field label="العنوان *">
-            <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className={inp} placeholder="المنطقة، الشارع، رقم المبنى" />
-          </Field>
+
+          {isOtherSub && (
+            <Field label="يرجى كتابة الخدمة المطلوبة *">
+              <input
+                value={form.otherService}
+                onChange={(e) => setForm({ ...form, otherService: e.target.value })}
+                className={inp}
+                placeholder="اكتب اسم الخدمة التي تحتاجها"
+              />
+              <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                نقدم العديد من الخدمات غير المدرجة بالقائمة — اكتب احتياجك وسنتواصل معك.
+              </p>
+            </Field>
+          )}
+
           <Field label="ملاحظات">
             <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={4} className={inp} placeholder="تفاصيل إضافية عن الحالة..." />
           </Field>
@@ -100,7 +186,7 @@ function RequestPage() {
   );
 }
 
-const inp = "w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-smooth";
+const inp = "w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-smooth disabled:opacity-60 disabled:cursor-not-allowed";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

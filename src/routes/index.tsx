@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, MessageCircle, Stethoscope, Ambulance, Activity, ShieldCheck, Clock, MapPin, HeartPulse, Microscope, Pill } from "lucide-react";
+import { ArrowLeft, MessageCircle, Stethoscope, Ambulance, ShieldCheck, Clock, MapPin, HeartPulse, Microscope, Package, Sparkles, ChevronDown } from "lucide-react";
+import { useState } from "react";
 import heroImg from "@/assets/hero-care.jpg";
 import ambulanceImg from "@/assets/ambulance.jpg";
 import equipmentImg from "@/assets/equipment.jpg";
-import { services, whyUs, site, waLink } from "@/lib/site";
+import { serviceCategories, whyUs, site, waLink, type ServiceCategory } from "@/lib/site";
 import { SectionHeading } from "@/components/SectionHeading";
 
 export const Route = createFileRoute("/")({
@@ -19,10 +20,15 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const iconMap = [Stethoscope, HeartPulse, Activity, Microscope, Pill, Ambulance];
+const iconMap = {
+  nursing: HeartPulse,
+  doctor: Stethoscope,
+  lab: Microscope,
+  ambulance: Ambulance,
+  equipment: Package,
+} as const;
 
 function Index() {
-  const featured = services.slice(0, 9);
   return (
     <>
       {/* HERO */}
@@ -96,34 +102,14 @@ function Index() {
           title="رعاية طبية تصل إلى باب منزلك"
           desc="من التمريض المنزلي إلى الإسعاف والأجهزة الطبية — نوفر منظومة متكاملة بأيدي متخصصين."
         />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {featured.map((s, i) => {
-            const Icon = iconMap[i % iconMap.length];
-            return (
-              <Link
-                key={s.slug}
-                to="/request"
-                search={{ service: s.slug } as never}
-                className="group relative bg-gradient-card rounded-2xl p-6 border border-border hover:border-primary/40 shadow-soft hover:shadow-elegant transition-smooth overflow-hidden"
-              >
-                <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-smooth" />
-                <div className="relative">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-hero flex items-center justify-center text-white shadow-soft group-hover:scale-110 transition-smooth">
-                    <Icon className="h-7 w-7" />
-                  </div>
-                  <h3 className="mt-5 text-lg font-extrabold text-foreground">{s.name}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-7">{s.desc}</p>
-                  <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary">
-                    اطلب الخدمة <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-smooth" />
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {serviceCategories.map((cat) => (
+            <CategoryCard key={cat.slug} cat={cat} />
+          ))}
         </div>
         <div className="text-center mt-10">
           <Link to="/services" className="inline-flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
-            عرض جميع الخدمات <ArrowLeft className="h-4 w-4" />
+            عرض جميع الخدمات بالتفصيل <ArrowLeft className="h-4 w-4" />
           </Link>
         </div>
       </section>
@@ -134,7 +120,7 @@ function Index() {
           <SectionHeading eyebrow="لماذا سونو" title="ثقتك هي عنوان نجاحنا" desc="نلتزم بأعلى معايير الجودة لنقدم خدمة طبية تستحقها أنت وعائلتك." />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {whyUs.map((w, i) => {
-              const Icons = [ShieldCheck, Clock, MapPin, HeartPulse, Activity, Stethoscope];
+              const Icons = [ShieldCheck, Clock, MapPin, HeartPulse, Sparkles, Stethoscope];
               const Icon = Icons[i % Icons.length];
               return (
                 <div key={w.title} className="bg-white rounded-2xl p-6 shadow-soft hover:shadow-elegant transition-smooth border border-border/50 hover:-translate-y-1">
@@ -189,5 +175,62 @@ function Index() {
         </div>
       </section>
     </>
+  );
+}
+
+function CategoryCard({ cat }: { cat: ServiceCategory }) {
+  const [open, setOpen] = useState(false);
+  const Icon = iconMap[cat.icon];
+  return (
+    <div className="group relative bg-gradient-card rounded-2xl p-6 border border-border hover:border-primary/40 shadow-soft hover:shadow-elegant transition-smooth overflow-hidden flex flex-col">
+      <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-smooth" />
+      <div className="relative flex-1">
+        <div className="h-14 w-14 rounded-2xl bg-gradient-hero flex items-center justify-center text-white shadow-soft group-hover:scale-110 transition-smooth">
+          <Icon className="h-7 w-7" />
+        </div>
+        <h3 className="mt-5 text-lg font-extrabold text-foreground">{cat.name}</h3>
+        <p className="mt-2 text-sm text-muted-foreground leading-7">{cat.desc}</p>
+        <div
+          className={`grid transition-all duration-300 ease-out ${open ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"}`}
+        >
+          <div className="overflow-hidden">
+            <ul className="space-y-2 border-t border-border/60 pt-4">
+              {cat.subs.map((s) => (
+                <li
+                  key={s.name}
+                  className={`flex items-center gap-2 text-sm rounded-lg px-3 py-2 ${
+                    s.featured
+                      ? "bg-gradient-hero text-primary-foreground font-bold shadow-soft"
+                      : "bg-white/60 text-foreground"
+                  }`}
+                >
+                  {s.featured ? <Sparkles className="h-4 w-4 shrink-0" /> : <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
+                  <span>{s.name}</span>
+                  {s.featured && <span className="ms-auto text-[10px] bg-white/20 px-2 py-0.5 rounded-full">مميز</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div className="relative mt-5 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:gap-3 transition-all"
+          aria-expanded={open}
+        >
+          {open ? "إخفاء التفاصيل" : "عرض التفاصيل"}
+          <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+        </button>
+        <Link
+          to="/request"
+          search={{ service: cat.slug } as never}
+          className="ms-auto inline-flex items-center gap-2 text-sm font-bold bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:shadow-elegant transition-smooth"
+        >
+          اطلب الآن <ArrowLeft className="h-4 w-4" />
+        </Link>
+      </div>
+    </div>
   );
 }

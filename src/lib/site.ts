@@ -36,28 +36,99 @@ export type Service = {
   category: "home" | "specialty" | "diagnostic" | "transport" | "equipment";
 };
 
+export type SubService = { name: string; featured?: boolean };
+export type ServiceCategory = {
+  slug: string;
+  name: string;
+  desc: string;
+  icon: "nursing" | "doctor" | "lab" | "ambulance" | "equipment";
+  subs: SubService[];
+};
+
+export const serviceCategories: ServiceCategory[] = [
+  {
+    slug: "nursing",
+    name: "الرعاية التمريضية المنزلية",
+    desc: "فريق تمريض مؤهل لرعاية احترافية ومتواصلة في منزلك على مدار الساعة.",
+    icon: "nursing",
+    subs: [
+      { name: "إعطاء الأدوية ومتابعة العلاج" },
+      { name: "تركيب محاليل" },
+      { name: "تركيب قسطرة" },
+      { name: "تغيير على الجروح" },
+      { name: "الحقن المنزلية" },
+      { name: "متابعة ما بعد العمليات" },
+      { name: "متابعة ورعاية كبار السن" },
+      { name: "العلاج الطبيعي المنزلي" },
+      { name: "أخرى" },
+    ],
+  },
+  {
+    slug: "home-visit",
+    name: "الكشف الطبي المنزلي",
+    desc: "نخبة من الاستشاريين والأطباء لزيارات منزلية في مختلف التخصصات.",
+    icon: "doctor",
+    subs: [
+      { name: "باطنة" },
+      { name: "أطفال" },
+      { name: "قلب" },
+      { name: "استشارات جراحية" },
+      { name: "نساء وتوليد" },
+      { name: "عظام" },
+      { name: "أخرى" },
+    ],
+  },
+  {
+    slug: "diagnostic",
+    name: "التحاليل والأشعة",
+    desc: "خدمات تشخيصية متنقلة بأحدث الأجهزة ودقة عالية في النتائج.",
+    icon: "lab",
+    subs: [
+      { name: "تحاليل منزلية" },
+      { name: "اشعة منزلية" },
+      { name: "سونار منزلي" },
+      { name: "رسم قلب" },
+      { name: "إيكو" },
+      { name: "X-Ray" },
+      { name: "أخرى" },
+    ],
+  },
+  {
+    slug: "ambulance",
+    name: "الإسعاف والنقل الطبي",
+    desc: "أسطول إسعاف مجهز وفريق طوارئ مدرب لاستجابة فورية وآمنة.",
+    icon: "ambulance",
+    subs: [
+      { name: "سيارات إسعاف" },
+      { name: "نقل المرضى بطبيب" },
+      { name: "نقل المرضى بدون طبيب" },
+      { name: "النقل بين المستشفيات" },
+      { name: "تأمين وتغطية الفعاليات الطبية", featured: true },
+      { name: "أخرى" },
+    ],
+  },
+  {
+    slug: "equipment",
+    name: "الأجهزة الطبية",
+    desc: "بيع وتأجير أجهزة طبية موثوقة بأسعار شفافة وضمان معتمد.",
+    icon: "equipment",
+    subs: [
+      { name: "بيع أجهزة طبية" },
+      { name: "إيجار أجهزة طبية" },
+      { name: "أخرى" },
+    ],
+  },
+];
+
+export const OTHER_CATEGORY = { slug: "other", name: "أخرى — خدمة غير موجودة بالقائمة" };
+
+// Legacy flat list (kept for backwards compatibility with deep links).
 export const services: Service[] = [
   { slug: "nursing", name: "الرعاية التمريضية المنزلية", desc: "رعاية تمريضية احترافية على مدار الساعة في منزلك بأيدي فريق مؤهل.", category: "home" },
-  { slug: "injections", name: "الحقن المنزلية", desc: "خدمة حقن آمنة ومعقّمة بالمنزل بأحدث المعايير الطبية.", category: "home" },
-  { slug: "iv", name: "تركيب المحاليل", desc: "تركيب المحاليل الوريدية بإشراف طبي متخصص في منزلك.", category: "home" },
-  { slug: "post-op", name: "متابعة ما بعد العمليات", desc: "متابعة دقيقة بعد الجراحات لضمان تعافٍ آمن وسريع.", category: "home" },
-  { slug: "elderly", name: "متابعة كبار السن", desc: "رعاية شاملة لكبار السن تجمع بين الكفاءة الطبية والاهتمام الإنساني.", category: "home" },
-  { slug: "home-visit", name: "الكشف المنزلي", desc: "كشف طبي شامل في راحة منزلك من نخبة الأطباء.", category: "specialty" },
-  { slug: "internal", name: "باطنة", desc: "استشارات وكشف باطنة عام لجميع الحالات والأعراض.", category: "specialty" },
-  { slug: "pediatrics", name: "أطفال", desc: "رعاية متخصصة للأطفال من حديثي الولادة وحتى المراهقة.", category: "specialty" },
-  { slug: "cardiology", name: "قلب", desc: "كشف القلب والأوعية مع رسم قلب منزلي عند الحاجة.", category: "specialty" },
-  { slug: "surgery", name: "جراحة", desc: "استشارات جراحية ومتابعة الحالات قبل وبعد التدخل.", category: "specialty" },
-  { slug: "obgyn", name: "نساء وتوليد", desc: "رعاية الحوامل ومتابعة صحة المرأة في خصوصية تامة.", category: "specialty" },
-  { slug: "vascular", name: "أوعية دموية", desc: "تشخيص وعلاج اضطرابات الدورة الدموية والأوعية.", category: "specialty" },
-  { slug: "ortho", name: "عظام", desc: "تشخيص وعلاج إصابات وأمراض العظام والمفاصل.", category: "specialty" },
-  { slug: "lab", name: "التحاليل المنزلية", desc: "سحب عينات وتحاليل شاملة في منزلك بنتائج موثقة.", category: "diagnostic" },
-  { slug: "radiology", name: "الأشعات المنزلية", desc: "أشعة سينية وموجات صوتية بأجهزة متنقلة حديثة.", category: "diagnostic" },
+  { slug: "home-visit", name: "الكشف الطبي المنزلي", desc: "كشف طبي شامل في راحة منزلك من نخبة الأطباء.", category: "specialty" },
+  { slug: "diagnostic", name: "التحاليل والأشعة", desc: "خدمات تشخيصية متنقلة بأحدث الأجهزة.", category: "diagnostic" },
+  { slug: "ambulance", name: "الإسعاف والنقل الطبي", desc: "أسطول إسعاف مجهز وفريق طوارئ مدرب.", category: "transport" },
   { slug: "equipment", name: "الأجهزة الطبية", desc: "بيع وتأجير أحدث الأجهزة الطبية المنزلية بضمان.", category: "equipment" },
-  { slug: "ambulance", name: "سيارات الإسعاف", desc: "أسطول إسعاف مجهز بأحدث المعدات وفريق طوارئ مدرب.", category: "transport" },
-  { slug: "transport", name: "نقل المرضى", desc: "نقل آمن ومريح للمرضى بمختلف الحالات.", category: "transport" },
-  { slug: "inter-hospital", name: "النقل بين المستشفيات", desc: "نقل تخصصي بين المستشفيات بإشراف طبي كامل.", category: "transport" },
-  { slug: "events", name: "تغطية الفعاليات", desc: "تأمين طبي شامل للفعاليات والمؤتمرات والمناسبات.", category: "transport" },
-  { slug: "physio", name: "العلاج الطبيعي المنزلي", desc: "جلسات علاج طبيعي بإشراف أخصائيين معتمدين.", category: "home" },
 ];
 
 export type Product = {
