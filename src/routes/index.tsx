@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, MessageCircle, Stethoscope, Ambulance, Activity, ShieldCheck, Clock, MapPin, HeartPulse, Microscope, Pill } from "lucide-react";
+import { ArrowLeft, MessageCircle, Stethoscope, Ambulance, ShieldCheck, Clock, MapPin, HeartPulse, Microscope, Package, Sparkles, ChevronDown } from "lucide-react";
+import { useState } from "react";
 import heroImg from "@/assets/hero-care.jpg";
 import ambulanceImg from "@/assets/ambulance.jpg";
 import equipmentImg from "@/assets/equipment.jpg";
-import { services, whyUs, site, waLink } from "@/lib/site";
+import { serviceCategories, whyUs, site, waLink, type ServiceCategory } from "@/lib/site";
 import { SectionHeading } from "@/components/SectionHeading";
 
 export const Route = createFileRoute("/")({
