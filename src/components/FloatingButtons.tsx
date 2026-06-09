@@ -1,4 +1,4 @@
-import { Phone, MessageCircle, Ambulance } from "lucide-react";
+import { Phone, MessageCircle, Ambulance, ShoppingBag } from "lucide-react";
 import { site, waLink } from "@/lib/site";
 
 export function FloatingButtons() {
@@ -29,6 +29,14 @@ export function FloatingButtons() {
       >
         <Ambulance className="h-5 w-5 shrink-0" />
         <span className="hidden group-hover:inline font-bold text-sm">اطلب إسعاف</span>
+      </a>
+      <a
+        href="/store"
+        aria-label="المتجر الطبي"
+        className="group flex items-center gap-2 bg-accent text-accent-foreground h-12 w-12 hover:w-auto hover:px-4 rounded-full shadow-elegant transition-smooth overflow-hidden whitespace-nowrap justify-center"
+      >
+        <ShoppingBag className="h-5 w-5 shrink-0" />
+        <span className="hidden group-hover:inline font-bold text-sm">المتجر الطبي</span>
       </a>
     </div>
   );
