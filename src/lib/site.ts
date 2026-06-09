@@ -1,4 +1,4 @@
-import logoAsset from "@/assets/swnw-logo.png.asset.json";
+const logoAsset = { url: "/swnw-logo.png" };
 import oxygen from "@/assets/p-oxygen.jpg";
 import bed from "@/assets/p-bed.jpg";
 import wheelchair from "@/assets/p-wheelchair.jpg";
