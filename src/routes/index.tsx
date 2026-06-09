@@ -102,34 +102,14 @@ function Index() {
           title="رعاية طبية تصل إلى باب منزلك"
           desc="من التمريض المنزلي إلى الإسعاف والأجهزة الطبية — نوفر منظومة متكاملة بأيدي متخصصين."
         />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {featured.map((s, i) => {
-            const Icon = iconMap[i % iconMap.length];
-            return (
-              <Link
-                key={s.slug}
-                to="/request"
-                search={{ service: s.slug } as never}
-                className="group relative bg-gradient-card rounded-2xl p-6 border border-border hover:border-primary/40 shadow-soft hover:shadow-elegant transition-smooth overflow-hidden"
-              >
-                <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-smooth" />
-                <div className="relative">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-hero flex items-center justify-center text-white shadow-soft group-hover:scale-110 transition-smooth">
-                    <Icon className="h-7 w-7" />
-                  </div>
-                  <h3 className="mt-5 text-lg font-extrabold text-foreground">{s.name}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-7">{s.desc}</p>
-                  <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary">
-                    اطلب الخدمة <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-smooth" />
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {serviceCategories.map((cat) => (
+            <CategoryCard key={cat.slug} cat={cat} />
+          ))}
         </div>
         <div className="text-center mt-10">
           <Link to="/services" className="inline-flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
-            عرض جميع الخدمات <ArrowLeft className="h-4 w-4" />
+            عرض جميع الخدمات بالتفصيل <ArrowLeft className="h-4 w-4" />
           </Link>
         </div>
       </section>
