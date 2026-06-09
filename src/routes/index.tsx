@@ -120,7 +120,7 @@ function Index() {
           <SectionHeading eyebrow="لماذا سونو" title="ثقتك هي عنوان نجاحنا" desc="نلتزم بأعلى معايير الجودة لنقدم خدمة طبية تستحقها أنت وعائلتك." />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {whyUs.map((w, i) => {
-              const Icons = [ShieldCheck, Clock, MapPin, HeartPulse, Activity, Stethoscope];
+              const Icons = [ShieldCheck, Clock, MapPin, HeartPulse, Sparkles, Stethoscope];
               const Icon = Icons[i % Icons.length];
               return (
                 <div key={w.title} className="bg-white rounded-2xl p-6 shadow-soft hover:shadow-elegant transition-smooth border border-border/50 hover:-translate-y-1">
