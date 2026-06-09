@@ -177,3 +177,60 @@ function Index() {
     </>
   );
 }
+
+function CategoryCard({ cat }: { cat: ServiceCategory }) {
+  const [open, setOpen] = useState(false);
+  const Icon = iconMap[cat.icon];
+  return (
+    <div className="group relative bg-gradient-card rounded-2xl p-6 border border-border hover:border-primary/40 shadow-soft hover:shadow-elegant transition-smooth overflow-hidden flex flex-col">
+      <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-smooth" />
+      <div className="relative flex-1">
+        <div className="h-14 w-14 rounded-2xl bg-gradient-hero flex items-center justify-center text-white shadow-soft group-hover:scale-110 transition-smooth">
+          <Icon className="h-7 w-7" />
+        </div>
+        <h3 className="mt-5 text-lg font-extrabold text-foreground">{cat.name}</h3>
+        <p className="mt-2 text-sm text-muted-foreground leading-7">{cat.desc}</p>
+        <div
+          className={`grid transition-all duration-300 ease-out ${open ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"}`}
+        >
+          <div className="overflow-hidden">
+            <ul className="space-y-2 border-t border-border/60 pt-4">
+              {cat.subs.map((s) => (
+                <li
+                  key={s.name}
+                  className={`flex items-center gap-2 text-sm rounded-lg px-3 py-2 ${
+                    s.featured
+                      ? "bg-gradient-hero text-primary-foreground font-bold shadow-soft"
+                      : "bg-white/60 text-foreground"
+                  }`}
+                >
+                  {s.featured ? <Sparkles className="h-4 w-4 shrink-0" /> : <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
+                  <span>{s.name}</span>
+                  {s.featured && <span className="ms-auto text-[10px] bg-white/20 px-2 py-0.5 rounded-full">مميز</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div className="relative mt-5 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:gap-3 transition-all"
+          aria-expanded={open}
+        >
+          {open ? "إخفاء التفاصيل" : "عرض التفاصيل"}
+          <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+        </button>
+        <Link
+          to="/request"
+          search={{ service: cat.slug } as never}
+          className="ms-auto inline-flex items-center gap-2 text-sm font-bold bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:shadow-elegant transition-smooth"
+        >
+          اطلب الآن <ArrowLeft className="h-4 w-4" />
+        </Link>
+      </div>
+    </div>
+  );
+}
