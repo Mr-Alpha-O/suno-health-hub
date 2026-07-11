@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { checkIsAdmin } from "@/lib/admin.functions";
-import { LayoutDashboard, Settings, Package, ListTree, Image as ImageIcon, LogOut, Loader2 } from "lucide-react";
+import { LayoutDashboard, Settings, Package, ListTree, Image as ImageIcon, LogOut, Loader2, Sparkles, Info, Users, MessageSquareQuote, HelpCircle, BarChart3, Briefcase, Phone, Menu, Inbox, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -14,10 +14,22 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 const links = [
   { to: "/admin", label: "الرئيسية", icon: LayoutDashboard, exact: true },
-  { to: "/admin/settings", label: "إعدادات الموقع", icon: Settings },
+  { to: "/admin/submissions", label: "صندوق الوارد", icon: Inbox },
+  { to: "/admin/hero", label: "قسم البداية", icon: Sparkles },
+  { to: "/admin/why-us", label: "لماذا نحن", icon: LayoutDashboard },
+  { to: "/admin/about", label: "من نحن", icon: Info },
+  { to: "/admin/team", label: "الفريق", icon: Users },
+  { to: "/admin/testimonials", label: "آراء العملاء", icon: MessageSquareQuote },
+  { to: "/admin/faqs", label: "الأسئلة الشائعة", icon: HelpCircle },
+  { to: "/admin/stats", label: "الأرقام", icon: BarChart3 },
   { to: "/admin/services", label: "الخدمات", icon: ListTree },
   { to: "/admin/products", label: "المتجر", icon: Package },
-  { to: "/admin/media", label: "مكتبة الوسائط", icon: ImageIcon },
+  { to: "/admin/jobs", label: "الوظائف", icon: Briefcase },
+  { to: "/admin/contact", label: "بيانات الاتصال", icon: Phone },
+  { to: "/admin/nav", label: "روابط التنقل", icon: Menu },
+  { to: "/admin/media", label: "الوسائط", icon: ImageIcon },
+  { to: "/admin/seo", label: "SEO", icon: Search },
+  { to: "/admin/settings", label: "إعدادات عامة", icon: Settings },
 ];
 
 function AdminLayout() {
