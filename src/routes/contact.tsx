@@ -3,6 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Phone, Mail, MessageCircle, MapPin, Send } from "lucide-react";
 import { site, waLink } from "@/lib/site";
+import { useServerFn } from "@tanstack/react-start";
+import { submitContactMessage } from "@/lib/public.functions";
 import { z } from "zod";
 
 export const Route = createFileRoute("/contact")({
@@ -26,10 +28,12 @@ const schema = z.object({
 
 function ContactPage() {
   const [f, setF] = useState({ name: "", phone: "", message: "" });
-  const submit = (e: React.FormEvent) => {
+  const submitFn = useServerFn(submitContactMessage);
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const r = schema.safeParse(f);
     if (!r.success) { toast.error("برجاء التأكد من البيانات"); return; }
+    try { await submitFn({ data: { name: f.name, phone: f.phone, message: f.message } }); } catch (err) { console.error(err); }
     const msg = `رسالة تواصل:%0A• الاسم: ${f.name}%0A• الهاتف: ${f.phone}%0A• الرسالة: ${f.message}`;
     toast.success("تم إرسال رسالتك، سنرد عليك قريباً");
     window.open(`https://wa.me/${site.whatsapp}?text=${msg}`, "_blank");

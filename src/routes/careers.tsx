@@ -3,6 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Briefcase, Send, Upload } from "lucide-react";
 import { jobs, site } from "@/lib/site";
+import { useServerFn } from "@tanstack/react-start";
+import { submitJobApplication } from "@/lib/public.functions";
 import { z } from "zod";
 
 export const Route = createFileRoute("/careers")({
@@ -27,11 +29,15 @@ const schema = z.object({
 
 function CareersPage() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", position: "", cv: null as File | null });
+  const submitFn = useServerFn(submitJobApplication);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error("برجاء التأكد من البيانات"); return; }
+    try {
+      await submitFn({ data: { name: form.name, phone: form.phone, email: form.email, position: form.position, notes: form.cv ? `CV file: ${form.cv.name}` : null } });
+    } catch (err) { console.error(err); }
     const msg = `تقديم وظيفة:%0A• الاسم: ${form.name}%0A• الهاتف: ${form.phone}%0A• الإيميل: ${form.email}%0A• الوظيفة: ${form.position}%0A• السيرة الذاتية: ${form.cv ? form.cv.name : "سيتم إرسالها"}`;
     toast.success("تم استلام طلبك، سنتواصل معك قريباً");
     window.open(`https://wa.me/${site.whatsapp}?text=${msg}`, "_blank");

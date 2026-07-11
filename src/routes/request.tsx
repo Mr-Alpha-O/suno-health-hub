@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Send, Sparkles } from "lucide-react";
 import { serviceCategories, OTHER_CATEGORY, site, waLink } from "@/lib/site";
+import { useServerFn } from "@tanstack/react-start";
+import { submitServiceRequest } from "@/lib/public.functions";
 import { z } from "zod";
 
 export const Route = createFileRoute("/request")({
@@ -33,6 +35,7 @@ const schema = z.object({
 
 function RequestPage() {
   const { service: initialService } = Route.useSearch();
+  const submitFn = useServerFn(submitServiceRequest);
   const initialCategory =
     serviceCategories.find((c) => c.slug === initialService)?.slug ?? "";
 
@@ -54,7 +57,7 @@ function RequestPage() {
   const isOtherCategory = form.category === OTHER_CATEGORY.slug;
   const isOtherSub = form.subService === OTHER || isOtherCategory;
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
@@ -71,6 +74,21 @@ function RequestPage() {
       ? OTHER_CATEGORY.name
       : selectedCategory?.name ?? form.category;
     const subName = isOtherCategory ? "—" : form.subService;
+    const finalSub = isOtherSub ? form.otherService : subName;
+
+    try {
+      await submitFn({
+        data: {
+          name: form.name,
+          phone: form.phone,
+          service_slug: form.category || null,
+          sub_service: finalSub || null,
+          notes: `العنوان: ${form.address}${form.notes ? `\nملاحظات: ${form.notes}` : ""}`,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    }
 
     const lines = [
       "🩺 طلب خدمة جديد من موقع سونو",

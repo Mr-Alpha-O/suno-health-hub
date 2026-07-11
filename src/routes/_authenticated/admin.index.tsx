@@ -1,58 +1,58 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { listCategories, listProducts, listSettings } from "@/lib/admin.functions";
-import { Package, ListTree, Settings } from "lucide-react";
+import { getDashboardCounts } from "@/lib/cms.functions";
+import { Package, ListTree, Users, Briefcase, MessageSquareQuote, HelpCircle, Inbox, Mail, Phone } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/admin/")({
-  component: Dashboard,
-});
+export const Route = createFileRoute("/_authenticated/admin/")({ component: Dashboard });
 
 function Dashboard() {
-  const lc = useServerFn(listCategories);
-  const lp = useServerFn(listProducts);
-  const ls = useServerFn(listSettings);
-  const [stats, setStats] = useState({ cats: 0, subs: 0, products: 0, settings: 0 });
+  const fn = useServerFn(getDashboardCounts);
+  const [d, setD] = useState<Awaited<ReturnType<typeof fn>> | null>(null);
+  useEffect(() => { fn().then(setD).catch(() => {}); }, [fn]);
 
-  useEffect(() => {
-    Promise.all([lc(), lp(), ls()]).then(([cats, prods, sets]) => {
-      const subs = (cats ?? []).reduce((n: number, c: any) => n + (c.service_subs?.length ?? 0), 0);
-      setStats({ cats: cats?.length ?? 0, subs, products: prods?.length ?? 0, settings: sets?.length ?? 0 });
-    }).catch(() => {});
-  }, [lc, lp, ls]);
+  const totals = d?.totals ?? ({} as Record<string, number>);
+  const inbox = d?.newInbox ?? ({} as Record<string, number>);
 
-  const cards = [
-    { label: "الأقسام", value: stats.cats, icon: ListTree },
-    { label: "الخدمات الفرعية", value: stats.subs, icon: ListTree },
-    { label: "المنتجات", value: stats.products, icon: Package },
-    { label: "الإعدادات", value: stats.settings, icon: Settings },
+  const stats = [
+    { label: "طلبات خدمة جديدة", value: inbox.service_submissions ?? 0, icon: Inbox, href: "/admin/submissions", highlight: true },
+    { label: "طلبات توظيف جديدة", value: inbox.job_applications ?? 0, icon: Briefcase, href: "/admin/submissions", highlight: true },
+    { label: "رسائل جديدة", value: inbox.contact_messages ?? 0, icon: Mail, href: "/admin/submissions", highlight: true },
+    { label: "المنتجات", value: totals.products ?? 0, icon: Package, href: "/admin/products" },
+    { label: "أقسام الخدمات", value: totals.service_categories ?? 0, icon: ListTree, href: "/admin/services" },
+    { label: "أعضاء الفريق", value: totals.team_members ?? 0, icon: Users, href: "/admin/team" },
+    { label: "الوظائف", value: totals.jobs ?? 0, icon: Briefcase, href: "/admin/jobs" },
+    { label: "الشهادات", value: totals.testimonials ?? 0, icon: MessageSquareQuote, href: "/admin/testimonials" },
+    { label: "الأسئلة الشائعة", value: totals.faqs ?? 0, icon: HelpCircle, href: "/admin/faqs" },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       <div>
-        <h1 className="text-2xl font-extrabold">مرحباً بك</h1>
+        <h1 className="text-2xl font-extrabold">مرحباً بك في لوحة التحكم</h1>
         <p className="text-sm text-muted-foreground mt-1">نظرة عامة على محتوى الموقع.</p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {cards.map((c) => (
-          <div key={c.label} className="bg-card border rounded-xl p-5 shadow-soft">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {stats.map((c) => (
+          <Link key={c.label} to={c.href} className={`bg-card border rounded-xl p-5 shadow-soft hover:shadow-elegant transition-smooth ${c.highlight && c.value > 0 ? "border-primary/40 bg-primary/5" : ""}`}>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{c.label}</span>
               <c.icon className="h-5 w-5 text-primary" />
             </div>
             <div className="mt-3 text-3xl font-extrabold">{c.value}</div>
-          </div>
+          </Link>
         ))}
       </div>
       <div className="bg-card border rounded-xl p-6 shadow-soft">
-        <h2 className="font-bold mb-2">ابدأ من هنا</h2>
-        <ul className="text-sm text-muted-foreground list-disc mr-5 space-y-1">
-          <li>أضِف الأقسام والخدمات الفرعية من صفحة "الخدمات".</li>
-          <li>أدِر منتجات المتجر من صفحة "المتجر".</li>
-          <li>ارفع الصور والشعارات من "مكتبة الوسائط".</li>
-          <li>عدّل بيانات الاتصال والشعار من "إعدادات الموقع".</li>
-        </ul>
+        <h2 className="font-bold mb-3">اختصارات سريعة</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+          <Link to="/admin/hero" className="rounded border px-3 py-2 hover:bg-muted">تعديل قسم البداية</Link>
+          <Link to="/admin/contact" className="rounded border px-3 py-2 hover:bg-muted">تعديل بيانات الاتصال</Link>
+          <Link to="/admin/products" className="rounded border px-3 py-2 hover:bg-muted">إدارة المتجر</Link>
+          <Link to="/admin/services" className="rounded border px-3 py-2 hover:bg-muted">إدارة الخدمات</Link>
+          <Link to="/admin/submissions" className="rounded border px-3 py-2 hover:bg-muted">مراجعة الطلبات</Link>
+          <Link to="/admin/seo" className="rounded border px-3 py-2 hover:bg-muted">إعدادات SEO</Link>
+        </div>
       </div>
     </div>
   );
