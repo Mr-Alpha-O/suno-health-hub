@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Briefcase, Send, Upload } from "lucide-react";
-import { jobs, site } from "@/lib/site";
+import { site } from "@/lib/site";
 import { useServerFn } from "@tanstack/react-start";
 import { submitJobApplication } from "@/lib/public.functions";
+import { jobsQO, contactQO } from "@/lib/public-queries";
 import { z } from "zod";
 
 export const Route = createFileRoute("/careers")({
@@ -17,7 +19,15 @@ export const Route = createFileRoute("/careers")({
     ],
     links: [{ rel: "canonical", href: "/careers" }],
   }),
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(jobsQO),
+      context.queryClient.ensureQueryData(contactQO),
+    ]);
+  },
   component: CareersPage,
+  errorComponent: ({ error }) => <div className="container mx-auto p-8 text-center text-sm text-muted-foreground">{error.message}</div>,
+  notFoundComponent: () => <div className="container mx-auto p-8 text-center">لم يتم العثور على وظائف.</div>,
 });
 
 const schema = z.object({
@@ -28,6 +38,9 @@ const schema = z.object({
 });
 
 function CareersPage() {
+  const { data: jobs } = useSuspenseQuery(jobsQO);
+  const { data: contact } = useSuspenseQuery(contactQO);
+  const whatsapp = contact?.whatsapp ?? site.whatsapp;
   const [form, setForm] = useState({ name: "", phone: "", email: "", position: "", cv: null as File | null });
   const submitFn = useServerFn(submitJobApplication);
 
@@ -40,7 +53,7 @@ function CareersPage() {
     } catch (err) { console.error(err); }
     const msg = `تقديم وظيفة:%0A• الاسم: ${form.name}%0A• الهاتف: ${form.phone}%0A• الإيميل: ${form.email}%0A• الوظيفة: ${form.position}%0A• السيرة الذاتية: ${form.cv ? form.cv.name : "سيتم إرسالها"}`;
     toast.success("تم استلام طلبك، سنتواصل معك قريباً");
-    window.open(`https://wa.me/${site.whatsapp}?text=${msg}`, "_blank");
+    window.open(`https://wa.me/${whatsapp}?text=${msg}`, "_blank");
     setForm({ name: "", phone: "", email: "", position: "", cv: null });
   };
 
@@ -57,12 +70,12 @@ function CareersPage() {
         <h2 className="text-2xl font-extrabold mb-6">الوظائف المتاحة</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {jobs.map((j) => (
-            <div key={j.title} className="bg-white rounded-2xl p-6 border border-border shadow-soft hover:shadow-elegant transition-smooth">
+            <div key={j.id} className="bg-white rounded-2xl p-6 border border-border shadow-soft hover:shadow-elegant transition-smooth">
               <div className="h-12 w-12 rounded-xl bg-gradient-hero text-white flex items-center justify-center">
                 <Briefcase className="h-6 w-6" />
               </div>
               <h3 className="mt-4 font-extrabold text-lg">{j.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-7">{j.desc}</p>
+              <p className="mt-2 text-sm text-muted-foreground leading-7">{j.description}</p>
             </div>
           ))}
         </div>
@@ -77,7 +90,7 @@ function CareersPage() {
           <Field label="الوظيفة المطلوبة *">
             <select className={inp} value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })}>
               <option value="">اختر الوظيفة</option>
-              {jobs.map((j) => <option key={j.title} value={j.title}>{j.title}</option>)}
+              {jobs.map((j) => <option key={j.id} value={j.title}>{j.title}</option>)}
             </select>
           </Field>
           <Field label="السيرة الذاتية (PDF)">

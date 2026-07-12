@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Phone, Mail, MessageCircle, MapPin, Send } from "lucide-react";
-import { site, waLink } from "@/lib/site";
+import { site } from "@/lib/site";
 import { useServerFn } from "@tanstack/react-start";
 import { submitContactMessage } from "@/lib/public.functions";
+import { contactQO } from "@/lib/public-queries";
+import { waLinkFor } from "@/lib/media";
 import { z } from "zod";
 
 export const Route = createFileRoute("/contact")({
@@ -17,7 +20,10 @@ export const Route = createFileRoute("/contact")({
     ],
     links: [{ rel: "canonical", href: "/contact" }],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(contactQO),
   component: ContactPage,
+  errorComponent: ({ error }) => <div className="container mx-auto p-8 text-center text-sm text-muted-foreground">{error.message}</div>,
+  notFoundComponent: () => <div className="container mx-auto p-8 text-center">لم يتم العثور على بيانات التواصل.</div>,
 });
 
 const schema = z.object({
@@ -27,6 +33,13 @@ const schema = z.object({
 });
 
 function ContactPage() {
+  const { data: contact } = useSuspenseQuery(contactQO);
+  const phone = contact?.phone ?? site.phone;
+  const phoneIntl = contact?.phone_intl ?? site.phoneIntl;
+  const whatsapp = contact?.whatsapp ?? site.whatsapp;
+  const email = contact?.email ?? site.email;
+  const address = contact?.address ?? "القاهرة الكبرى";
+  const mapEmbed = contact?.map_embed?.trim() || "https://www.google.com/maps?q=Cairo,Egypt&output=embed";
   const [f, setF] = useState({ name: "", phone: "", message: "" });
   const submitFn = useServerFn(submitContactMessage);
   const submit = async (e: React.FormEvent) => {
@@ -36,7 +49,7 @@ function ContactPage() {
     try { await submitFn({ data: { name: f.name, phone: f.phone, message: f.message } }); } catch (err) { console.error(err); }
     const msg = `رسالة تواصل:%0A• الاسم: ${f.name}%0A• الهاتف: ${f.phone}%0A• الرسالة: ${f.message}`;
     toast.success("تم إرسال رسالتك، سنرد عليك قريباً");
-    window.open(`https://wa.me/${site.whatsapp}?text=${msg}`, "_blank");
+    window.open(`https://wa.me/${whatsapp}?text=${msg}`, "_blank");
     setF({ name: "", phone: "", message: "" });
   };
 
@@ -51,10 +64,10 @@ function ContactPage() {
 
       <section className="container mx-auto px-4 py-12 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: Phone, title: "اتصل بنا", val: site.phone, href: `tel:${site.phoneIntl}` },
-          { icon: MessageCircle, title: "واتساب", val: site.phone, href: waLink() },
-          { icon: Mail, title: "البريد الإلكتروني", val: site.email, href: `mailto:${site.email}` },
-          { icon: MapPin, title: "موقعنا", val: "القاهرة الكبرى", href: "#map" },
+          { icon: Phone, title: "اتصل بنا", val: phone, href: `tel:${phoneIntl}` },
+          { icon: MessageCircle, title: "واتساب", val: phone, href: waLinkFor(whatsapp) },
+          { icon: Mail, title: "البريد الإلكتروني", val: email, href: `mailto:${email}` },
+          { icon: MapPin, title: "موقعنا", val: address, href: "#map" },
         ].map(({ icon: Icon, title, val, href }) => (
           <a key={title} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener" className="group bg-white rounded-2xl p-6 border border-border shadow-soft hover:shadow-elegant transition-smooth text-center">
             <div className="mx-auto h-14 w-14 rounded-2xl bg-gradient-hero text-white flex items-center justify-center group-hover:scale-110 transition-smooth">
@@ -80,7 +93,7 @@ function ContactPage() {
         <div id="map" className="rounded-2xl overflow-hidden shadow-soft border border-border min-h-[420px]">
           <iframe
             title="موقعنا على الخريطة"
-            src="https://www.google.com/maps?q=Cairo,Egypt&output=embed"
+            src={mapEmbed}
             className="w-full h-full min-h-[420px]"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"

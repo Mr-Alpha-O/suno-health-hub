@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, HeartPulse, Stethoscope, Microscope, Ambulance, Package, Sparkles } from "lucide-react";
-import { serviceCategories, type ServiceCategory } from "@/lib/site";
 import { SectionHeading } from "@/components/SectionHeading";
+import { serviceCategoriesQO } from "@/lib/public-queries";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
@@ -13,7 +14,10 @@ export const Route = createFileRoute("/services")({
     ],
     links: [{ rel: "canonical", href: "/services" }],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(serviceCategoriesQO),
   component: ServicesPage,
+  errorComponent: ({ error }) => <div className="container mx-auto p-8 text-center text-sm text-muted-foreground">{error.message}</div>,
+  notFoundComponent: () => <div className="container mx-auto p-8 text-center">لم يتم العثور على الخدمات.</div>,
 });
 
 const iconMap = {
@@ -23,8 +27,13 @@ const iconMap = {
   ambulance: Ambulance,
   equipment: Package,
 } as const;
+type IconKey = keyof typeof iconMap;
+function iconFor(k: string | null | undefined): IconKey {
+  return (k && k in iconMap ? k : "nursing") as IconKey;
+}
 
 function ServicesPage() {
+  const { data: categories } = useSuspenseQuery(serviceCategoriesQO);
   return (
     <>
       <section className="bg-gradient-soft py-16">
@@ -39,7 +48,7 @@ function ServicesPage() {
       <section className="container mx-auto px-4 py-16">
         <SectionHeading eyebrow="فئاتنا" title="استعرض جميع الفئات والخدمات الفرعية" desc="كل فئة تضم باقة كاملة من الخدمات المتخصصة." />
         <div className="space-y-6">
-          {serviceCategories.map((cat) => (
+          {categories.map((cat) => (
             <CategoryBlock key={cat.slug} cat={cat} />
           ))}
         </div>
@@ -48,8 +57,18 @@ function ServicesPage() {
   );
 }
 
-function CategoryBlock({ cat }: { cat: ServiceCategory }) {
-  const Icon = iconMap[cat.icon];
+type CategoryBlockProps = {
+  cat: {
+    slug: string;
+    name: string;
+    description: string | null;
+    icon: string | null;
+    subs: Array<{ id: string; name: string; featured: boolean | null }>;
+  };
+};
+
+function CategoryBlock({ cat }: CategoryBlockProps) {
+  const Icon = iconMap[iconFor(cat.icon)];
   return (
     <article className="bg-gradient-card rounded-3xl border border-border shadow-soft hover:shadow-elegant transition-smooth overflow-hidden">
       <div className="grid lg:grid-cols-[1fr_2fr]">
@@ -59,7 +78,7 @@ function CategoryBlock({ cat }: { cat: ServiceCategory }) {
               <Icon className="h-7 w-7" />
             </div>
             <h2 className="mt-4 text-2xl font-extrabold leading-tight">{cat.name}</h2>
-            <p className="mt-2 text-sm text-white/90 leading-7">{cat.desc}</p>
+            <p className="mt-2 text-sm text-white/90 leading-7">{cat.description}</p>
           </div>
           <Link
             to="/request"
@@ -74,7 +93,7 @@ function CategoryBlock({ cat }: { cat: ServiceCategory }) {
           <ul className="grid sm:grid-cols-2 gap-3">
             {cat.subs.map((s) => (
               <li
-                key={s.name}
+                key={s.id}
                 className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm ${
                   s.featured
                     ? "bg-gradient-hero text-primary-foreground font-extrabold shadow-soft"
