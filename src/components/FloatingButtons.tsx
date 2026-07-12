@@ -1,11 +1,18 @@
+import { useQuery } from "@tanstack/react-query";
 import { Phone, MessageCircle, Ambulance, ShoppingBag } from "lucide-react";
-import { site, waLink } from "@/lib/site";
+import { site } from "@/lib/site";
+import { contactQO } from "@/lib/public-queries";
+import { waLinkFor } from "@/lib/media";
 
 export function FloatingButtons() {
+  const { data: contact } = useQuery(contactQO);
+  const phoneIntl = contact?.phone_intl ?? site.phoneIntl;
+  const whatsapp = contact?.whatsapp ?? site.whatsapp;
+
   return (
     <div className="fixed bottom-5 left-5 z-50 flex flex-col gap-3">
       <a
-        href={`tel:${site.phoneIntl}`}
+        href={`tel:${phoneIntl}`}
         aria-label="اتصل الآن"
         className="group flex items-center gap-2 bg-primary text-primary-foreground h-12 w-12 hover:w-auto hover:px-4 rounded-full shadow-elegant transition-smooth overflow-hidden whitespace-nowrap justify-center animate-pulse-ring"
       >
@@ -13,7 +20,7 @@ export function FloatingButtons() {
         <span className="hidden group-hover:inline font-bold text-sm">اتصل الآن</span>
       </a>
       <a
-        href={waLink()}
+        href={waLinkFor(whatsapp)}
         target="_blank" rel="noopener"
         aria-label="واتساب"
         className="group flex items-center gap-2 bg-[#25D366] text-white h-12 w-12 hover:w-auto hover:px-4 rounded-full shadow-elegant transition-smooth overflow-hidden whitespace-nowrap justify-center"
@@ -22,7 +29,7 @@ export function FloatingButtons() {
         <span className="hidden group-hover:inline font-bold text-sm">واتساب</span>
       </a>
       <a
-        href={waLink("🚑 طلب إسعاف عاجل — برجاء التواصل فوراً")}
+        href={waLinkFor(whatsapp, "🚑 طلب إسعاف عاجل — برجاء التواصل فوراً")}
         target="_blank" rel="noopener"
         aria-label="اطلب إسعاف"
         className="group flex items-center gap-2 bg-destructive text-destructive-foreground h-12 w-12 hover:w-auto hover:px-4 rounded-full shadow-elegant transition-smooth overflow-hidden whitespace-nowrap justify-center"

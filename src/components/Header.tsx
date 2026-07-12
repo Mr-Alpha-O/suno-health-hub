@@ -1,13 +1,23 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Menu, X, Phone } from "lucide-react";
-import { nav, site, waLink } from "@/lib/site";
+import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { navQO, contactQO } from "@/lib/public-queries";
+import { waLinkFor } from "@/lib/media";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const { data: navItems } = useQuery(navQO);
+  const { data: contact } = useQuery(contactQO);
+  const nav = (navItems ?? []).map((n) => ({ to: n.href, label: n.label }));
+  const phone = contact?.phone ?? site.phone;
+  const phoneIntl = contact?.phone_intl ?? site.phoneIntl;
+  const whatsapp = contact?.whatsapp ?? site.whatsapp;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -48,10 +58,10 @@ export function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-2">
-          <a href={`tel:${site.phoneIntl}`} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold text-primary hover:bg-secondary transition-smooth" dir="ltr">
-            <Phone className="h-4 w-4" /> {site.phone}
+          <a href={`tel:${phoneIntl}`} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold text-primary hover:bg-secondary transition-smooth" dir="ltr">
+            <Phone className="h-4 w-4" /> {phone}
           </a>
-          <a href={waLink()} target="_blank" rel="noopener" className="hidden xl:inline-flex bg-gradient-hero text-primary-foreground px-4 py-2 rounded-lg text-sm font-bold shadow-soft hover:shadow-elegant transition-smooth">
+          <a href={waLinkFor(whatsapp)} target="_blank" rel="noopener" className="hidden xl:inline-flex bg-gradient-hero text-primary-foreground px-4 py-2 rounded-lg text-sm font-bold shadow-soft hover:shadow-elegant transition-smooth">
             احجز الآن
           </a>
         </div>
@@ -76,8 +86,8 @@ export function Header() {
                 {n.label}
               </Link>
             ))}
-            <a href={`tel:${site.phoneIntl}`} className="mt-2 flex items-center justify-center gap-2 bg-gradient-hero text-primary-foreground py-3 rounded-lg font-bold">
-              <Phone className="h-4 w-4" /> اتصل الآن {site.phone}
+            <a href={`tel:${phoneIntl}`} className="mt-2 flex items-center justify-center gap-2 bg-gradient-hero text-primary-foreground py-3 rounded-lg font-bold">
+              <Phone className="h-4 w-4" /> اتصل الآن {phone}
             </a>
           </nav>
         </div>

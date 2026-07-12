@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Send, Sparkles } from "lucide-react";
-import { serviceCategories, OTHER_CATEGORY, site, waLink } from "@/lib/site";
+import { site } from "@/lib/site";
 import { useServerFn } from "@tanstack/react-start";
 import { submitServiceRequest } from "@/lib/public.functions";
+import { serviceCategoriesQO, contactQO } from "@/lib/public-queries";
+import { waLinkFor } from "@/lib/media";
 import { z } from "zod";
 
 export const Route = createFileRoute("/request")({
@@ -18,10 +21,20 @@ export const Route = createFileRoute("/request")({
     links: [{ rel: "canonical", href: "/request" }],
   }),
   validateSearch: (s: Record<string, unknown>) => ({ service: typeof s.service === "string" ? s.service : "" }),
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(serviceCategoriesQO),
+      context.queryClient.ensureQueryData(contactQO),
+    ]);
+  },
   component: RequestPage,
+  errorComponent: ({ error }) => <div className="container mx-auto p-8 text-center text-sm text-muted-foreground">{error.message}</div>,
+  notFoundComponent: () => <div className="container mx-auto p-8 text-center">لم يتم العثور على المحتوى.</div>,
 });
 
 const OTHER = "أخرى";
+const OTHER_SLUG = "other";
+const OTHER_NAME = "أخرى — خدمة غير موجودة بالقائمة";
 
 const schema = z.object({
   name: z.string().trim().min(2, "الاسم مطلوب").max(80),
@@ -35,9 +48,14 @@ const schema = z.object({
 
 function RequestPage() {
   const { service: initialService } = Route.useSearch();
+  const { data: categories } = useSuspenseQuery(serviceCategoriesQO);
+  const { data: contact } = useSuspenseQuery(contactQO);
+  const phone = contact?.phone ?? site.phone;
+  const phoneIntl = contact?.phone_intl ?? site.phoneIntl;
+  const whatsapp = contact?.whatsapp ?? site.whatsapp;
+  const email = contact?.email ?? site.email;
   const submitFn = useServerFn(submitServiceRequest);
-  const initialCategory =
-    serviceCategories.find((c) => c.slug === initialService)?.slug ?? "";
+  const initialCategory = categories.find((c) => c.slug === initialService)?.slug ?? "";
 
   const [form, setForm] = useState({
     name: "",
@@ -51,10 +69,10 @@ function RequestPage() {
   const [loading, setLoading] = useState(false);
 
   const selectedCategory = useMemo(
-    () => serviceCategories.find((c) => c.slug === form.category),
-    [form.category],
+    () => categories.find((c) => c.slug === form.category),
+    [form.category, categories],
   );
-  const isOtherCategory = form.category === OTHER_CATEGORY.slug;
+  const isOtherCategory = form.category === OTHER_SLUG;
   const isOtherSub = form.subService === OTHER || isOtherCategory;
 
   const submit = async (e: React.FormEvent) => {
@@ -71,7 +89,7 @@ function RequestPage() {
     setLoading(true);
 
     const categoryName = isOtherCategory
-      ? OTHER_CATEGORY.name
+      ? OTHER_NAME
       : selectedCategory?.name ?? form.category;
     const subName = isOtherCategory ? "—" : form.subService;
     const finalSub = isOtherSub ? form.otherService : subName;
@@ -105,7 +123,7 @@ function RequestPage() {
     const msg = lines.join("\n");
     toast.success("تم إرسال طلبك! سنتواصل معك خلال دقائق.");
     setTimeout(() => {
-      window.open(`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
+      window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
       setLoading(false);
       setForm({ name: "", phone: "", address: "", category: "", subService: "", otherService: "", notes: "" });
     }, 600);
@@ -142,10 +160,10 @@ function RequestPage() {
                 className={inp}
               >
                 <option value="">اختر القسم</option>
-                {serviceCategories.map((c) => (
+                {categories.map((c) => (
                   <option key={c.slug} value={c.slug}>{c.name}</option>
                 ))}
-                <option value={OTHER_CATEGORY.slug}>{OTHER_CATEGORY.name}</option>
+                <option value={OTHER_SLUG}>{OTHER_NAME}</option>
               </select>
             </Field>
             <Field label="الخدمة المطلوبة *">
@@ -159,7 +177,7 @@ function RequestPage() {
                   {isOtherCategory ? "اكتب الخدمة بالأسفل" : form.category ? "اختر الخدمة" : "اختر القسم أولاً"}
                 </option>
                 {selectedCategory?.subs.map((s) => (
-                  <option key={s.name} value={s.name}>
+                  <option key={s.id} value={s.name}>
                     {s.name}{s.featured ? " ⭐" : ""}
                   </option>
                 ))}
@@ -194,9 +212,9 @@ function RequestPage() {
           <h3 className="font-extrabold text-lg">تفضل بالتواصل المباشر</h3>
           <p className="mt-2 text-sm text-muted-foreground leading-7">نحن متاحون على مدار 24 ساعة لخدمتك.</p>
           <div className="mt-5 space-y-3">
-            <a href={`tel:${site.phoneIntl}`} className="block bg-white border border-border rounded-xl px-4 py-3 font-bold text-primary hover:bg-secondary transition-smooth" dir="ltr">📞 {site.phone}</a>
-            <a href={waLink()} target="_blank" rel="noopener" className="block bg-[#25D366] text-white rounded-xl px-4 py-3 font-bold text-center hover:opacity-90 transition-smooth">💬 واتساب</a>
-            <a href={`mailto:${site.email}`} className="block bg-white border border-border rounded-xl px-4 py-3 font-bold text-foreground hover:bg-secondary transition-smooth break-all text-sm" dir="ltr">✉ {site.email}</a>
+            <a href={`tel:${phoneIntl}`} className="block bg-white border border-border rounded-xl px-4 py-3 font-bold text-primary hover:bg-secondary transition-smooth" dir="ltr">📞 {phone}</a>
+            <a href={waLinkFor(whatsapp)} target="_blank" rel="noopener" className="block bg-[#25D366] text-white rounded-xl px-4 py-3 font-bold text-center hover:opacity-90 transition-smooth">💬 واتساب</a>
+            <a href={`mailto:${email}`} className="block bg-white border border-border rounded-xl px-4 py-3 font-bold text-foreground hover:bg-secondary transition-smooth break-all text-sm" dir="ltr">✉ {email}</a>
           </div>
         </aside>
       </section>

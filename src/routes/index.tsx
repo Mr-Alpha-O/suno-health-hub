@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, MessageCircle, Stethoscope, Ambulance, ShieldCheck, Clock, MapPin, HeartPulse, Microscope, Package, Sparkles, ChevronDown } from "lucide-react";
 import { useState } from "react";
-import heroImg from "@/assets/hero-care.jpg";
-import ambulanceImg from "@/assets/ambulance.jpg";
-import equipmentImg from "@/assets/equipment.jpg";
-import { serviceCategories, whyUs, site, waLink, type ServiceCategory } from "@/lib/site";
 import { SectionHeading } from "@/components/SectionHeading";
+import { site } from "@/lib/site";
+import { heroQO, whyUsQO, serviceCategoriesQO, contactQO } from "@/lib/public-queries";
+import { heroImageFallback, ambulanceImage, equipmentImage, waLinkFor } from "@/lib/media";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,7 +17,17 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(heroQO),
+      context.queryClient.ensureQueryData(whyUsQO),
+      context.queryClient.ensureQueryData(serviceCategoriesQO),
+      context.queryClient.ensureQueryData(contactQO),
+    ]);
+  },
   component: Index,
+  errorComponent: ({ error }) => <div className="container mx-auto p-8 text-center text-sm text-muted-foreground">{error.message}</div>,
+  notFoundComponent: () => <div className="container mx-auto p-8 text-center">لم يتم العثور على المحتوى.</div>,
 });
 
 const iconMap = {
@@ -28,7 +38,22 @@ const iconMap = {
   equipment: Package,
 } as const;
 
+type IconKey = keyof typeof iconMap;
+function iconFor(key: string | null | undefined): IconKey {
+  return (key && key in iconMap ? key : "nursing") as IconKey;
+}
+
 function Index() {
+  const { data: hero } = useSuspenseQuery(heroQO);
+  const { data: whyUs } = useSuspenseQuery(whyUsQO);
+  const { data: categories } = useSuspenseQuery(serviceCategoriesQO);
+  const { data: contact } = useSuspenseQuery(contactQO);
+  const phone = contact?.phone ?? site.phone;
+  const phoneIntl = contact?.phone_intl ?? site.phoneIntl;
+  const whatsapp = contact?.whatsapp ?? site.whatsapp;
+  const heroImg = (hero?.image_url && hero.image_url.trim()) || heroImageFallback;
+  const stats = Array.isArray(hero?.stats) ? (hero!.stats as Array<{ value: string; label: string }>) : [];
+
   return (
     <>
       {/* HERO */}
@@ -38,33 +63,31 @@ function Index() {
         <div className="absolute -bottom-32 -right-32 w-[480px] h-[480px] rounded-full bg-accent/20 blur-3xl" />
         <div className="container mx-auto px-4 py-16 md:py-24 grid lg:grid-cols-2 gap-12 items-center relative">
           <div className="animate-fade-up">
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-primary bg-white/70 backdrop-blur px-3 py-1.5 rounded-full mb-5 shadow-soft">
-              <span className="h-2 w-2 rounded-full bg-primary-glow animate-pulse" />
-              متاحون الآن على مدار 24 ساعة
-            </div>
+            {hero?.badge && (
+              <div className="inline-flex items-center gap-2 text-xs font-bold text-primary bg-white/70 backdrop-blur px-3 py-1.5 rounded-full mb-5 shadow-soft">
+                <span className="h-2 w-2 rounded-full bg-primary-glow animate-pulse" />
+                {hero.badge}
+              </div>
+            )}
             <h1 className="text-4xl md:text-6xl font-extrabold text-foreground leading-tight text-balance">
-              سونو للخدمات الطبية <span className="text-primary">المتكاملة</span>
+              {hero?.headline ?? site.nameAr} {hero?.headline_highlight && <span className="text-primary">{hero.headline_highlight}</span>}
             </h1>
             <p className="mt-5 text-lg text-muted-foreground leading-9 max-w-xl">
-              نقدم خدمات الرعاية الصحية المنزلية والطبية بأعلى معايير الجودة والاحترافية على مدار الساعة بفريق طبي مؤهل وأحدث المعدات.
+              {hero?.subheading}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/request" className="inline-flex items-center gap-2 bg-gradient-hero text-primary-foreground px-6 py-3.5 rounded-xl font-bold shadow-elegant hover:shadow-glow transition-smooth">
-                اطلب خدمة الآن <ArrowLeft className="h-4 w-4" />
+              <Link to={(hero?.cta_primary_href as string) || "/request"} className="inline-flex items-center gap-2 bg-gradient-hero text-primary-foreground px-6 py-3.5 rounded-xl font-bold shadow-elegant hover:shadow-glow transition-smooth">
+                {hero?.cta_primary_label ?? "اطلب خدمة الآن"} <ArrowLeft className="h-4 w-4" />
               </Link>
-              <a href={waLink()} target="_blank" rel="noopener" className="inline-flex items-center gap-2 bg-white text-primary border border-primary/20 px-6 py-3.5 rounded-xl font-bold shadow-soft hover:bg-secondary transition-smooth">
-                <MessageCircle className="h-4 w-4" /> تواصل عبر واتساب
+              <a href={waLinkFor(whatsapp)} target="_blank" rel="noopener" className="inline-flex items-center gap-2 bg-white text-primary border border-primary/20 px-6 py-3.5 rounded-xl font-bold shadow-soft hover:bg-secondary transition-smooth">
+                <MessageCircle className="h-4 w-4" /> {hero?.cta_secondary_label ?? "تواصل عبر واتساب"}
               </a>
             </div>
             <div className="mt-10 grid grid-cols-3 gap-4 max-w-md">
-              {[
-                { v: "24/7", l: "متاحون دائماً" },
-                { v: "+50", l: "خدمة طبية" },
-                { v: "+100", l: "كادر متخصص" },
-              ].map((s) => (
-                <div key={s.l} className="text-center bg-white/70 backdrop-blur rounded-xl py-3 shadow-soft">
-                  <div className="text-2xl font-extrabold text-primary">{s.v}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{s.l}</div>
+              {stats.map((s) => (
+                <div key={s.label} className="text-center bg-white/70 backdrop-blur rounded-xl py-3 shadow-soft">
+                  <div className="text-2xl font-extrabold text-primary">{s.value}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -103,7 +126,7 @@ function Index() {
           desc="من التمريض المنزلي إلى الإسعاف والأجهزة الطبية — نوفر منظومة متكاملة بأيدي متخصصين."
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {serviceCategories.map((cat) => (
+          {categories.map((cat) => (
             <CategoryCard key={cat.slug} cat={cat} />
           ))}
         </div>
@@ -123,12 +146,12 @@ function Index() {
               const Icons = [ShieldCheck, Clock, MapPin, HeartPulse, Sparkles, Stethoscope];
               const Icon = Icons[i % Icons.length];
               return (
-                <div key={w.title} className="bg-white rounded-2xl p-6 shadow-soft hover:shadow-elegant transition-smooth border border-border/50 hover:-translate-y-1">
+                <div key={w.id} className="bg-white rounded-2xl p-6 shadow-soft hover:shadow-elegant transition-smooth border border-border/50 hover:-translate-y-1">
                   <div className="h-12 w-12 rounded-xl bg-secondary text-primary flex items-center justify-center">
                     <Icon className="h-6 w-6" />
                   </div>
                   <h3 className="mt-4 font-extrabold text-lg">{w.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-7">{w.desc}</p>
+                  <p className="mt-2 text-sm text-muted-foreground leading-7">{w.description}</p>
                 </div>
               );
             })}
@@ -150,12 +173,12 @@ function Index() {
               نقل آمن للمرضى بين المستشفيات وتغطية طبية للفعاليات بفريق طوارئ مدرب وأحدث المعدات.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a href={`tel:${site.phoneIntl}`} className="bg-white text-primary px-5 py-3 rounded-xl font-bold hover:bg-secondary transition-smooth">اتصل الآن {site.phone}</a>
-              <a href={waLink("🚑 أحتاج خدمة إسعاف عاجل")} target="_blank" rel="noopener" className="border border-white/40 text-white px-5 py-3 rounded-xl font-bold hover:bg-white/10 transition-smooth">طلب إسعاف</a>
+              <a href={`tel:${phoneIntl}`} className="bg-white text-primary px-5 py-3 rounded-xl font-bold hover:bg-secondary transition-smooth">اتصل الآن {phone}</a>
+              <a href={waLinkFor(whatsapp, "🚑 أحتاج خدمة إسعاف عاجل")} target="_blank" rel="noopener" className="border border-white/40 text-white px-5 py-3 rounded-xl font-bold hover:bg-white/10 transition-smooth">طلب إسعاف</a>
             </div>
           </div>
           <div className="relative min-h-[300px]">
-            <img src={ambulanceImg} alt="سيارة إسعاف" width={1200} height={800} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={ambulanceImage} alt="سيارة إسعاف" width={1200} height={800} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
           </div>
         </div>
       </section>
@@ -170,7 +193,7 @@ function Index() {
             </Link>
           </div>
           <div className="rounded-3xl overflow-hidden shadow-elegant border-4 border-white">
-            <img src={equipmentImg} alt="أجهزة طبية" width={1200} height={800} loading="lazy" className="w-full h-[400px] object-cover" />
+            <img src={equipmentImage} alt="أجهزة طبية" width={1200} height={800} loading="lazy" className="w-full h-[400px] object-cover" />
           </div>
         </div>
       </section>
@@ -178,9 +201,17 @@ function Index() {
   );
 }
 
-function CategoryCard({ cat }: { cat: ServiceCategory }) {
+type CategoryWithSubs = {
+  slug: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  subs: Array<{ id: string; name: string; featured: boolean | null }>;
+};
+
+function CategoryCard({ cat }: { cat: CategoryWithSubs }) {
   const [open, setOpen] = useState(false);
-  const Icon = iconMap[cat.icon];
+  const Icon = iconMap[iconFor(cat.icon)];
   return (
     <div className="group relative bg-gradient-card rounded-2xl p-6 border border-border hover:border-primary/40 shadow-soft hover:shadow-elegant transition-smooth overflow-hidden flex flex-col">
       <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-smooth" />
@@ -189,7 +220,7 @@ function CategoryCard({ cat }: { cat: ServiceCategory }) {
           <Icon className="h-7 w-7" />
         </div>
         <h3 className="mt-5 text-lg font-extrabold text-foreground">{cat.name}</h3>
-        <p className="mt-2 text-sm text-muted-foreground leading-7">{cat.desc}</p>
+        <p className="mt-2 text-sm text-muted-foreground leading-7">{cat.description}</p>
         <div
           className={`grid transition-all duration-300 ease-out ${open ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"}`}
         >
@@ -197,7 +228,7 @@ function CategoryCard({ cat }: { cat: ServiceCategory }) {
             <ul className="space-y-2 border-t border-border/60 pt-4">
               {cat.subs.map((s) => (
                 <li
-                  key={s.name}
+                  key={s.id}
                   className={`flex items-center gap-2 text-sm rounded-lg px-3 py-2 ${
                     s.featured
                       ? "bg-gradient-hero text-primary-foreground font-bold shadow-soft"
