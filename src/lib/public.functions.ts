@@ -107,9 +107,7 @@ export const getNavItems = createServerFn({ method: "GET" }).handler(async () =>
 export const getSiteSettings = createServerFn({ method: "GET" }).handler(async () => {
   const sb = anonClient();
   const { data } = await sb.from("site_settings").select("*");
-  const map: Record<string, unknown> = {};
-  (data ?? []).forEach((r) => { map[r.key] = r.value; });
-  return map;
+  return (data ?? []) as Array<{ key: string; value: unknown }>;
 });
 
 // ============ SUBMIT FUNCTIONS ============
