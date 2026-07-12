@@ -104,10 +104,13 @@ export const getNavItems = createServerFn({ method: "GET" }).handler(async () =>
   return data ?? [];
 });
 
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | { [k: string]: JsonValue } | JsonValue[];
+
 export const getSiteSettings = createServerFn({ method: "GET" }).handler(async () => {
   const sb = anonClient();
   const { data } = await sb.from("site_settings").select("*");
-  return (data ?? []) as Array<{ key: string; value: unknown }>;
+  return (data ?? []) as Array<{ key: string; value: JsonValue }>;
 });
 
 // ============ SUBMIT FUNCTIONS ============
