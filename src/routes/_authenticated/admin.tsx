@@ -93,20 +93,30 @@ function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 flex" dir="rtl">
-      <aside className="w-64 shrink-0 bg-card border-l flex flex-col">
-        <div className="p-4 border-b">
+    <div className="min-h-screen bg-muted/30 flex flex-col md:flex-row" dir="rtl">
+      <div className="md:hidden flex items-center justify-between p-3 border-b bg-card">
+        <button onClick={() => setMobileOpen(v => !v)} className="p-2 rounded-md border" aria-label="القائمة"><Menu className="h-5 w-5" /></button>
+        <div className="text-sm font-bold">لوحة التحكم</div>
+        <div className="relative">
+          <Inbox className="h-5 w-5" />
+          {inboxCount > 0 && <span className="absolute -top-1 -left-2 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">{inboxCount}</span>}
+        </div>
+      </div>
+      <aside className={cn("w-full md:w-64 shrink-0 bg-card border-l flex-col", mobileOpen ? "flex" : "hidden md:flex")}>
+        <div className="p-4 border-b hidden md:block">
           <div className="text-sm font-bold">لوحة التحكم</div>
           <div className="text-xs text-muted-foreground">SWNW Admin</div>
         </div>
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto max-h-[70vh] md:max-h-none">
           {links.map((l) => {
             const active = l.exact ? pathname === l.to : pathname.startsWith(l.to);
+            const badge = l.badgeKey === "inbox" ? inboxCount : 0;
             return (
               <Link key={l.to} to={l.to}
-                className={cn("flex items-center gap-2 px-3 py-2 rounded-md text-sm font-semibold transition-smooth",
+                className={cn("flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm font-semibold transition-smooth",
                   active ? "bg-primary text-primary-foreground" : "hover:bg-muted")}>
-                <l.icon className="h-4 w-4" /> {l.label}
+                <span className="flex items-center gap-2"><l.icon className="h-4 w-4" /> {l.label}</span>
+                {badge > 0 && <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">{badge}</span>}
               </Link>
             );
           })}
@@ -115,7 +125,7 @@ function AdminLayout() {
           <LogOut className="h-4 w-4" /> تسجيل الخروج
         </button>
       </aside>
-      <main className="flex-1 p-6 overflow-x-auto">
+      <main className="flex-1 p-4 md:p-6 overflow-x-auto">
         <Outlet />
       </main>
     </div>
