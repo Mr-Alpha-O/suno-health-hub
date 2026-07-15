@@ -14,8 +14,8 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "job_applications", label: "طلبات التوظيف" },
   { key: "contact_messages", label: "رسائل التواصل" },
 ];
-const STATUSES = ["new","contacted","in_progress","done","archived"] as const;
-const STATUS_LABEL: Record<string, string> = { new: "جديد", contacted: "تم التواصل", in_progress: "قيد التنفيذ", done: "منجز", archived: "مؤرشف" };
+const STATUSES = ["new","contacted","scheduled","in_progress","completed","done","cancelled","archived"] as const;
+const STATUS_LABEL: Record<string, string> = { new: "جديد", contacted: "تم التواصل", scheduled: "مجدول", in_progress: "قيد التنفيذ", completed: "مكتمل", done: "منجز", cancelled: "ملغى", archived: "مؤرشف" };
 
 function Page() {
   const [tab, setTab] = useState<Tab>("service_submissions");
@@ -55,10 +55,18 @@ function Page() {
     const a = document.createElement("a"); a.href = url; a.download = `${tab}.csv`; a.click();
     URL.revokeObjectURL(url);
   }
+  async function exportXlsx() {
+    if (rows.length === 0) return;
+    const XLSX = await import("xlsx");
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, tab.slice(0, 30));
+    XLSX.writeFile(wb, `${tab}.xlsx`);
+  }
 
   return (
     <div className="space-y-4" dir="rtl">
-      <PageHeader title="صندوق الوارد" desc="طلبات ورسائل الموقع." action={<button onClick={exportCsv} className={btnGhost}><Download className="h-3 w-3" /> CSV</button>} />
+      <PageHeader title="صندوق الوارد" desc="طلبات ورسائل الموقع." action={<div className="flex gap-2"><button onClick={exportCsv} className={btnGhost}><Download className="h-3 w-3" /> CSV</button><button onClick={exportXlsx} className={btnGhost}><Download className="h-3 w-3" /> Excel</button></div>} />
       <div className="flex gap-2 border-b">
         {TABS.map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)} className={`px-4 py-2 text-sm font-bold border-b-2 -mb-px ${tab === t.key ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>

@@ -128,9 +128,9 @@ export const getDashboardRecent = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const sb = context.supabase;
     const [svc, jobs, msgs, doctorsCount] = await Promise.all([
-      sb.from("service_submissions").select("id,name,phone,service_slug,sub_service,status,created_at").order("created_at", { ascending: false }).limit(5),
-      sb.from("job_applications").select("id,name,phone,position,status,created_at").order("created_at", { ascending: false }).limit(5),
-      sb.from("contact_messages").select("id,name,email,subject,status,created_at").order("created_at", { ascending: false }).limit(5),
+      sb.from("service_submissions").select("id,name,phone,service_slug,sub_service,status,created_at").order("created_at", { ascending: false }).limit(10),
+      sb.from("job_applications").select("id,name,phone,position,status,created_at").order("created_at", { ascending: false }).limit(10),
+      sb.from("contact_messages").select("id,name,email,subject,status,created_at").order("created_at", { ascending: false }).limit(10),
       (sb as any).from("doctors").select("*", { count: "exact", head: true }),
     ]);
     return {

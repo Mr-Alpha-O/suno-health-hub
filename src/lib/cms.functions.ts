@@ -253,7 +253,7 @@ export const listContactMessages = createServerFn({ method: "GET" }).middleware(
   const { data, error } = await context.supabase.from("contact_messages").select("*").order("created_at", { ascending: false }).limit(500);
   if (error) throw new Error(error.message); return data;
 });
-const StatusEnum = z.enum(["new","contacted","in_progress","done","archived"]);
+const StatusEnum = z.enum(["new","contacted","scheduled","in_progress","completed","done","cancelled","archived"]);
 const StatusUpdate = z.object({
   table: z.enum(["service_submissions","job_applications","contact_messages"]),
   id: z.string().uuid(),
@@ -277,20 +277,31 @@ export const deleteSubmission = createServerFn({ method: "POST" }).middleware([r
 
 /* ================= DASHBOARD COUNTS ================= */
 export const getDashboardCounts = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const sb = context.supabase as any;
   const tables = [
     "service_submissions","job_applications","contact_messages",
-    "products","service_categories","team_members","jobs","testimonials","faqs",
+    "products","service_categories","team_members","jobs","testimonials","faqs","doctors",
   ] as const;
   const results = await Promise.all(tables.map(async (t) => {
-    const { count } = await context.supabase.from(t).select("*", { count: "exact", head: true });
+    const { count } = await sb.from(t).select("*", { count: "exact", head: true });
     return [t, count ?? 0] as const;
   }));
   const newCounts = await Promise.all((["service_submissions","job_applications","contact_messages"] as const).map(async (t) => {
-    const { count } = await context.supabase.from(t).select("*", { count: "exact", head: true }).eq("status", "new");
+    const { count } = await sb.from(t).select("*", { count: "exact", head: true }).eq("status", "new");
     return [t, count ?? 0] as const;
   }));
+  const now = new Date();
+  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  const startWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const [{ count: reqToday }, { count: reqWeek }, { count: reqMonth }] = await Promise.all([
+    sb.from("service_submissions").select("*", { count: "exact", head: true }).gte("created_at", startToday),
+    sb.from("service_submissions").select("*", { count: "exact", head: true }).gte("created_at", startWeek),
+    sb.from("service_submissions").select("*", { count: "exact", head: true }).gte("created_at", startMonth),
+  ]);
   return {
     totals: Object.fromEntries(results) as Record<(typeof tables)[number], number>,
     newInbox: Object.fromEntries(newCounts) as Record<"service_submissions"|"job_applications"|"contact_messages", number>,
+    requests: { today: reqToday ?? 0, week: reqWeek ?? 0, month: reqMonth ?? 0 },
   };
 });

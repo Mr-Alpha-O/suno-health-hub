@@ -53,6 +53,39 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          object_id: string | null
+          object_type: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          object_id?: string | null
+          object_type?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          object_id?: string | null
+          object_type?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       contact_branches: {
         Row: {
           address: string
@@ -978,6 +1011,9 @@ export type Database = {
         | "in_progress"
         | "done"
         | "archived"
+        | "scheduled"
+        | "completed"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1112,6 +1148,9 @@ export const Constants = {
         "in_progress",
         "done",
         "archived",
+        "scheduled",
+        "completed",
+        "cancelled",
       ],
     },
   },
