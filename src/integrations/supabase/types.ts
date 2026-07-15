@@ -53,6 +53,87 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_branches: {
+        Row: {
+          address: string
+          created_at: string
+          hours: string | null
+          id: string
+          is_primary: boolean
+          is_visible: boolean
+          map_embed: string | null
+          name: string | null
+          notes: string | null
+          phone: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          hours?: string | null
+          id?: string
+          is_primary?: boolean
+          is_visible?: boolean
+          map_embed?: string | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          hours?: string | null
+          id?: string
+          is_primary?: boolean
+          is_visible?: boolean
+          map_embed?: string | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contact_emails: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean
+          is_visible: boolean
+          label: string | null
+          notes: string | null
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          is_visible?: boolean
+          label?: string | null
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          is_visible?: boolean
+          label?: string | null
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       contact_info: {
         Row: {
           address: string | null
@@ -134,6 +215,81 @@ export type Database = {
           status?: Database["public"]["Enums"]["submission_status"]
           subject?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      contact_phones: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean
+          is_visible: boolean
+          label: string | null
+          notes: string | null
+          sort_order: number
+          updated_at: string
+          value: string
+          value_intl: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          is_visible?: boolean
+          label?: string | null
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+          value: string
+          value_intl?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          is_visible?: boolean
+          label?: string | null
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+          value?: string
+          value_intl?: string | null
+        }
+        Relationships: []
+      }
+      contact_whatsapps: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean
+          is_visible: boolean
+          label: string | null
+          notes: string | null
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          is_visible?: boolean
+          label?: string | null
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          is_visible?: boolean
+          label?: string | null
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+          value?: string
         }
         Relationships: []
       }
@@ -460,7 +616,7 @@ export type Database = {
           old_price: number | null
           rent_price: number | null
           short: string | null
-          slug: string
+          slug: string | null
           sort_order: number
           stock: number | null
           updated_at: string
@@ -479,7 +635,7 @@ export type Database = {
           old_price?: number | null
           rent_price?: number | null
           short?: string | null
-          slug: string
+          slug?: string | null
           sort_order?: number
           stock?: number | null
           updated_at?: string
@@ -498,7 +654,7 @@ export type Database = {
           old_price?: number | null
           rent_price?: number | null
           short?: string | null
-          slug?: string
+          slug?: string | null
           sort_order?: number
           stock?: number | null
           updated_at?: string
