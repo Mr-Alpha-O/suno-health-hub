@@ -132,7 +132,7 @@ export const deleteTestimonial = createServerFn({ method: "POST" }).middleware([
 const FaqSchema = z.object({
   id: z.string().uuid().optional(),
   question: z.string().min(1),
-  answer: z.string().min(1),
+  answer: z.string().nullable().optional(),
   category: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
