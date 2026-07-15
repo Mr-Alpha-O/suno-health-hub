@@ -154,7 +154,7 @@ export const deleteFaq = createServerFn({ method: "POST" }).middleware([requireS
 const StatSchema = z.object({
   id: z.string().uuid().optional(),
   label: z.string().min(1),
-  value: z.string().min(1),
+  value: z.string().nullable().optional(),
   icon: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
