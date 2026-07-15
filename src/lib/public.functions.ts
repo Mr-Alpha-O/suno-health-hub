@@ -68,6 +68,16 @@ export const getTeam = createServerFn({ method: "GET" }).handler(async () => {
   return data ?? [];
 });
 
+export const getDoctors = createServerFn({ method: "GET" }).handler(async () => {
+  const sb = anonClient();
+  const { data } = await (sb as any).from("doctors").select("*").eq("is_visible", true).order("sort_order");
+  return (data ?? []) as Array<{
+    id: string; name: string; specialty: string | null; description: string | null;
+    qualifications: string | null; experience: string | null; photo_url: string | null;
+    phone: string | null; whatsapp: string | null; is_available: boolean; sort_order: number;
+  }>;
+});
+
 export const getTestimonials = createServerFn({ method: "GET" }).handler(async () => {
   const sb = anonClient();
   const { data } = await sb.from("testimonials").select("*").eq("is_visible", true).order("sort_order");
@@ -102,6 +112,12 @@ export const getNavItems = createServerFn({ method: "GET" }).handler(async () =>
   const sb = anonClient();
   const { data } = await sb.from("nav_items").select("*").eq("is_visible", true).order("sort_order");
   return data ?? [];
+});
+
+export const getHomepageSections = createServerFn({ method: "GET" }).handler(async () => {
+  const sb = anonClient();
+  const { data } = await (sb as any).from("homepage_sections").select("*").order("sort_order");
+  return (data ?? []) as Array<{ id: string; key: string; label: string; sort_order: number; is_visible: boolean }>;
 });
 
 type JsonPrimitive = string | number | boolean | null;

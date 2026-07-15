@@ -34,8 +34,10 @@ import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminNavRouteImport } from './routes/_authenticated/admin.nav'
 import { Route as AuthenticatedAdminMediaRouteImport } from './routes/_authenticated/admin.media'
 import { Route as AuthenticatedAdminJobsRouteImport } from './routes/_authenticated/admin.jobs'
+import { Route as AuthenticatedAdminHomepageRouteImport } from './routes/_authenticated/admin.homepage'
 import { Route as AuthenticatedAdminHeroRouteImport } from './routes/_authenticated/admin.hero'
 import { Route as AuthenticatedAdminFaqsRouteImport } from './routes/_authenticated/admin.faqs'
+import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin.doctors'
 import { Route as AuthenticatedAdminContactRouteImport } from './routes/_authenticated/admin.contact'
 import { Route as AuthenticatedAdminAboutRouteImport } from './routes/_authenticated/admin.about'
 
@@ -168,6 +170,12 @@ const AuthenticatedAdminJobsRoute = AuthenticatedAdminJobsRouteImport.update({
   path: '/jobs',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminHomepageRoute =
+  AuthenticatedAdminHomepageRouteImport.update({
+    id: '/homepage',
+    path: '/homepage',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminHeroRoute = AuthenticatedAdminHeroRouteImport.update({
   id: '/hero',
   path: '/hero',
@@ -178,6 +186,12 @@ const AuthenticatedAdminFaqsRoute = AuthenticatedAdminFaqsRouteImport.update({
   path: '/faqs',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminDoctorsRoute =
+  AuthenticatedAdminDoctorsRouteImport.update({
+    id: '/doctors',
+    path: '/doctors',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminContactRoute =
   AuthenticatedAdminContactRouteImport.update({
     id: '/contact',
@@ -204,8 +218,10 @@ export interface FileRoutesByFullPath {
   '/store/$slug': typeof StoreSlugRoute
   '/admin/about': typeof AuthenticatedAdminAboutRoute
   '/admin/contact': typeof AuthenticatedAdminContactRoute
+  '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/faqs': typeof AuthenticatedAdminFaqsRoute
   '/admin/hero': typeof AuthenticatedAdminHeroRoute
+  '/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/admin/jobs': typeof AuthenticatedAdminJobsRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
   '/admin/nav': typeof AuthenticatedAdminNavRoute
@@ -233,8 +249,10 @@ export interface FileRoutesByTo {
   '/store/$slug': typeof StoreSlugRoute
   '/admin/about': typeof AuthenticatedAdminAboutRoute
   '/admin/contact': typeof AuthenticatedAdminContactRoute
+  '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/faqs': typeof AuthenticatedAdminFaqsRoute
   '/admin/hero': typeof AuthenticatedAdminHeroRoute
+  '/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/admin/jobs': typeof AuthenticatedAdminJobsRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
   '/admin/nav': typeof AuthenticatedAdminNavRoute
@@ -265,8 +283,10 @@ export interface FileRoutesById {
   '/store/$slug': typeof StoreSlugRoute
   '/_authenticated/admin/about': typeof AuthenticatedAdminAboutRoute
   '/_authenticated/admin/contact': typeof AuthenticatedAdminContactRoute
+  '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/_authenticated/admin/faqs': typeof AuthenticatedAdminFaqsRoute
   '/_authenticated/admin/hero': typeof AuthenticatedAdminHeroRoute
+  '/_authenticated/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/_authenticated/admin/jobs': typeof AuthenticatedAdminJobsRoute
   '/_authenticated/admin/media': typeof AuthenticatedAdminMediaRoute
   '/_authenticated/admin/nav': typeof AuthenticatedAdminNavRoute
@@ -297,8 +317,10 @@ export interface FileRouteTypes {
     | '/store/$slug'
     | '/admin/about'
     | '/admin/contact'
+    | '/admin/doctors'
     | '/admin/faqs'
     | '/admin/hero'
+    | '/admin/homepage'
     | '/admin/jobs'
     | '/admin/media'
     | '/admin/nav'
@@ -326,8 +348,10 @@ export interface FileRouteTypes {
     | '/store/$slug'
     | '/admin/about'
     | '/admin/contact'
+    | '/admin/doctors'
     | '/admin/faqs'
     | '/admin/hero'
+    | '/admin/homepage'
     | '/admin/jobs'
     | '/admin/media'
     | '/admin/nav'
@@ -357,8 +381,10 @@ export interface FileRouteTypes {
     | '/store/$slug'
     | '/_authenticated/admin/about'
     | '/_authenticated/admin/contact'
+    | '/_authenticated/admin/doctors'
     | '/_authenticated/admin/faqs'
     | '/_authenticated/admin/hero'
+    | '/_authenticated/admin/homepage'
     | '/_authenticated/admin/jobs'
     | '/_authenticated/admin/media'
     | '/_authenticated/admin/nav'
@@ -564,6 +590,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminJobsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/homepage': {
+      id: '/_authenticated/admin/homepage'
+      path: '/homepage'
+      fullPath: '/admin/homepage'
+      preLoaderRoute: typeof AuthenticatedAdminHomepageRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/hero': {
       id: '/_authenticated/admin/hero'
       path: '/hero'
@@ -576,6 +609,13 @@ declare module '@tanstack/react-router' {
       path: '/faqs'
       fullPath: '/admin/faqs'
       preLoaderRoute: typeof AuthenticatedAdminFaqsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/doctors': {
+      id: '/_authenticated/admin/doctors'
+      path: '/doctors'
+      fullPath: '/admin/doctors'
+      preLoaderRoute: typeof AuthenticatedAdminDoctorsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/contact': {
@@ -598,8 +638,10 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAboutRoute: typeof AuthenticatedAdminAboutRoute
   AuthenticatedAdminContactRoute: typeof AuthenticatedAdminContactRoute
+  AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
   AuthenticatedAdminFaqsRoute: typeof AuthenticatedAdminFaqsRoute
   AuthenticatedAdminHeroRoute: typeof AuthenticatedAdminHeroRoute
+  AuthenticatedAdminHomepageRoute: typeof AuthenticatedAdminHomepageRoute
   AuthenticatedAdminJobsRoute: typeof AuthenticatedAdminJobsRoute
   AuthenticatedAdminMediaRoute: typeof AuthenticatedAdminMediaRoute
   AuthenticatedAdminNavRoute: typeof AuthenticatedAdminNavRoute
@@ -618,8 +660,10 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAboutRoute: AuthenticatedAdminAboutRoute,
   AuthenticatedAdminContactRoute: AuthenticatedAdminContactRoute,
+  AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
   AuthenticatedAdminFaqsRoute: AuthenticatedAdminFaqsRoute,
   AuthenticatedAdminHeroRoute: AuthenticatedAdminHeroRoute,
+  AuthenticatedAdminHomepageRoute: AuthenticatedAdminHomepageRoute,
   AuthenticatedAdminJobsRoute: AuthenticatedAdminJobsRoute,
   AuthenticatedAdminMediaRoute: AuthenticatedAdminMediaRoute,
   AuthenticatedAdminNavRoute: AuthenticatedAdminNavRoute,
