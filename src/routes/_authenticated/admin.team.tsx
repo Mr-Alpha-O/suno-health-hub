@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listTeam, upsertTeam, deleteTeam } from "@/lib/cms.functions";
 import { toast } from "sonner";
-import { Save, Trash2, Plus } from "lucide-react";
-import { Field, PageHeader, inp, btnPrimary, btnDanger, EmptyState } from "@/components/admin/CrudHelpers";
+import { Plus } from "lucide-react";
+import { Field, PageHeader, inp, btnPrimary, EmptyState } from "@/components/admin/CrudHelpers";
+import { useListToolkit, ListToolbar, Pagination, RowSelect } from "@/components/admin/ListToolkit";
+import { useEditableRow, RowActions } from "@/components/admin/RowActions";
 
 export const Route = createFileRoute("/_authenticated/admin/team")({ component: Page });
 type Row = { id?: string; name: string; role: string | null; bio: string | null; photo_url: string | null; sort_order: number; is_visible: boolean };
@@ -14,34 +16,54 @@ function Page() {
   const [rows, setRows] = useState<Row[]>([]);
   async function load() { try { setRows((await l()) as Row[]); } catch (e) { toast.error((e as Error).message); } }
   useEffect(() => { load(); }, []);
-  async function save(r: Row) { try { await u({ data: r }); toast.success("تم الحفظ"); load(); } catch (e) { toast.error((e as Error).message); } }
-  async function remove(id?: string) { if (!id || !confirm("حذف؟")) return; try { await d({ data: { id } }); toast.success("تم"); load(); } catch (e) { toast.error((e as Error).message); } }
-  async function add() { const name = prompt("اسم عضو الفريق"); if (!name) return; await save({ name, role: "", bio: "", photo_url: "", sort_order: rows.length, is_visible: true }); }
+  async function save(r: Row) {
+    if (!r.name?.trim()) { toast.error("الاسم مطلوب"); return; }
+    try { await u({ data: r }); toast.success("تم الحفظ"); load(); } catch (e) { toast.error((e as Error).message); }
+  }
+  async function remove(id?: string) { if (!id) return; try { await d({ data: { id } }); toast.success("تم الحذف"); load(); } catch (e) { toast.error((e as Error).message); } }
+  async function duplicate(r: Row) { const { id: _id, ...rest } = r; void _id; try { await u({ data: { ...rest, name: `${rest.name} (نسخة)`, sort_order: rows.length } }); toast.success("تم النسخ"); load(); } catch (e) { toast.error((e as Error).message); } }
+  async function add() { const name = prompt("اسم عضو الفريق"); if (!name?.trim()) return; await save({ name: name.trim(), role: "", bio: "", photo_url: "", sort_order: rows.length, is_visible: true }); }
+
+  const state = useListToolkit<Row>(rows, {
+    searchIn: (r) => `${r.name} ${r.role ?? ""}`,
+    initialSort: "sort_order",
+    filterFn: (r, f) => f === "visible" ? r.is_visible : f === "hidden" ? !r.is_visible : true,
+  });
+
+  async function bulk(ids: string[], fn: (id: string) => Promise<void>) {
+    try { for (const id of ids) await fn(id); state.clearSelected(); toast.success("تم"); load(); } catch (e) { toast.error((e as Error).message); }
+  }
 
   return (
     <div className="space-y-4" dir="rtl">
-      <PageHeader title="الفريق" desc="أعضاء الفريق الطبي." action={<button onClick={add} className={btnPrimary}><Plus className="h-3 w-3" /> إضافة</button>} />
-      {rows.length === 0 ? <EmptyState text="لا يوجد أعضاء بعد." /> :
-        rows.map((r) => <Row key={r.id} row={r} onSave={save} onRemove={() => remove(r.id)} />)}
+      <PageHeader title="الفريق" desc="أعضاء الفريق." action={<button onClick={add} className={btnPrimary}><Plus className="h-3 w-3" /> إضافة</button>} />
+      <ListToolbar state={state} searchPlaceholder="بحث بالاسم..." sortOptions={[{ key: "sort_order", label: "الترتيب" }, { key: "name", label: "الاسم" }]} filterOptions={[{ value: "visible", label: "ظاهر" }, { value: "hidden", label: "مخفي" }]}
+        onBulkDelete={(ids) => bulk(ids, (id) => d({ data: { id } }).then(() => undefined))}
+        onBulkShow={(ids) => bulk(ids, async (id) => { const r = rows.find((x) => x.id === id); if (r) await u({ data: { ...r, is_visible: true } }); })}
+        onBulkHide={(ids) => bulk(ids, async (id) => { const r = rows.find((x) => x.id === id); if (r) await u({ data: { ...r, is_visible: false } }); })} />
+      {state.paged.length === 0 ? <EmptyState text="لا يوجد أعضاء مطابقون." /> :
+        state.paged.map((r) => <TeamRow key={r.id} row={r} state={state} onSave={save} onRemove={() => remove(r.id)} onDuplicate={() => duplicate(r)} onToggleVisible={async () => { await u({ data: { ...r, is_visible: !r.is_visible } }); load(); }} />)}
+      <Pagination state={state} />
     </div>
   );
 }
-function Row({ row, onSave, onRemove }: { row: Row; onSave: (r: Row) => void; onRemove: () => void }) {
-  const [r, setR] = useState(row); useEffect(() => setR(row), [row]);
+function TeamRow({ row, state, onSave, onRemove, onDuplicate, onToggleVisible }: { row: Row; state: ReturnType<typeof useListToolkit<Row>>; onSave: (r: Row) => Promise<void>; onRemove: () => Promise<void>; onDuplicate: () => Promise<void>; onToggleVisible: () => Promise<void>; }) {
+  const [r, setR, dirty, clean] = useEditableRow(row);
   return (
     <div className="bg-card border rounded-xl p-4 space-y-3">
+      <div className="flex items-center gap-2"><RowSelect id={r.id} state={state as never} />{!r.is_visible && <span className="text-[10px] rounded-full bg-muted px-2 py-0.5">مخفي</span>}</div>
       <div className="grid md:grid-cols-4 gap-2">
-        <Field label="الاسم"><input className={inp} value={r.name} onChange={(e) => setR({ ...r, name: e.target.value })} /></Field>
+        <Field label="الاسم *"><input className={inp} value={r.name} onChange={(e) => setR({ ...r, name: e.target.value })} /></Field>
         <Field label="الوظيفة"><input className={inp} value={r.role ?? ""} onChange={(e) => setR({ ...r, role: e.target.value })} /></Field>
         <Field label="الترتيب"><input type="number" className={inp} value={r.sort_order} onChange={(e) => setR({ ...r, sort_order: Number(e.target.value) })} /></Field>
         <label className="flex items-center gap-2 text-sm mt-6"><input type="checkbox" checked={r.is_visible} onChange={(e) => setR({ ...r, is_visible: e.target.checked })} /> ظاهر</label>
       </div>
       <Field label="السيرة"><textarea rows={2} className={inp} value={r.bio ?? ""} onChange={(e) => setR({ ...r, bio: e.target.value })} /></Field>
-      <Field label="رابط الصورة"><input className={inp} value={r.photo_url ?? ""} onChange={(e) => setR({ ...r, photo_url: e.target.value })} /></Field>
-      <div className="flex gap-2">
-        <button className={btnPrimary} onClick={() => onSave(r)}><Save className="h-3 w-3" /> حفظ</button>
-        <button className={btnDanger} onClick={onRemove}><Trash2 className="h-3 w-3" /> حذف</button>
-      </div>
+      <Field label="رابط الصورة">
+        <input className={inp} value={r.photo_url ?? ""} onChange={(e) => setR({ ...r, photo_url: e.target.value })} />
+        {r.photo_url && <img src={r.photo_url} alt="" className="mt-2 h-16 w-16 rounded-lg object-cover border" onError={(e) => (e.currentTarget.style.display = "none")} />}
+      </Field>
+      <RowActions row={r} dirty={dirty} onSave={async () => { await onSave(r); clean(); }} onDelete={onRemove} onDuplicate={onDuplicate} onToggleVisible={onToggleVisible} />
     </div>
   );
 }
