@@ -46,13 +46,24 @@ export const deleteSetting = createServerFn({ method: "POST" })
 // ---------- Service categories ----------
 const CategorySchema = z.object({
   id: z.string().uuid().optional(),
-  slug: z.string().min(1),
+  slug: z.string().nullable().optional(),
   name: z.string().min(1),
   description: z.string().nullable().optional(),
   icon: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
 });
+
+function slugify(input: string): string {
+  return (input || "")
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, "-")
+    .replace(/[^a-z0-9\u0600-\u06FF-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || `cat-${Date.now().toString(36)}`;
+}
 
 export const listCategories = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -69,10 +80,12 @@ export const upsertCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(CategorySchema)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("service_categories").upsert(data);
+    const payload = { ...data, slug: (data.slug && data.slug.trim()) ? data.slug.trim() : slugify(data.name) };
+    const { error } = await context.supabase.from("service_categories").upsert(payload);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 export const deleteCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
