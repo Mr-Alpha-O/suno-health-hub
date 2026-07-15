@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight, CheckCircle2, MessageCircle, ShoppingCart, Repeat } from "lucide-react";
+import { useState } from "react";
 import { site } from "@/lib/site";
 import { productBySlugQO, contactQO } from "@/lib/public-queries";
 import { productImage, waLinkFor } from "@/lib/media";
@@ -37,7 +38,9 @@ function ProductPage() {
   const { data: contact } = useSuspenseQuery(contactQO);
   if (!p) return null;
   const whatsapp = contact?.whatsapp ?? site.whatsapp;
-  const img = productImage(p.slug, p.image);
+  const mainImg = productImage(p.slug, p.image);
+  const gallery = [mainImg, ...((p as any).images ?? []).map((i: any) => i.url as string)].filter(Boolean);
+  const [active, setActive] = useState(0);
   const buy = Number(p.buy_price ?? 0);
   const rent = Number(p.rent_price ?? 0);
   const details = Array.isArray(p.details) ? (p.details as string[]) : [];
@@ -48,8 +51,19 @@ function ProductPage() {
         <ArrowRight className="h-4 w-4" /> العودة للمتجر
       </Link>
       <div className="grid lg:grid-cols-2 gap-10">
-        <div className="rounded-3xl overflow-hidden bg-secondary/30 border border-border shadow-elegant aspect-square">
-          <img src={img} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
+        <div>
+          <div className="rounded-3xl overflow-hidden bg-secondary/30 border border-border shadow-elegant aspect-square">
+            <img src={gallery[active] ?? mainImg} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
+          </div>
+          {gallery.length > 1 && (
+            <div className="mt-3 grid grid-cols-5 gap-2">
+              {gallery.map((g, i) => (
+                <button key={g + i} onClick={() => setActive(i)} className={`rounded-lg overflow-hidden aspect-square border-2 ${active === i ? "border-primary" : "border-transparent"}`}>
+                  <img src={g} alt="" loading="lazy" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div>
           <div className="text-sm text-primary font-bold">{p.category}</div>

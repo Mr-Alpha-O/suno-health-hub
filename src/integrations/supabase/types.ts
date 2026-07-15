@@ -137,6 +137,57 @@ export type Database = {
         }
         Relationships: []
       }
+      doctors: {
+        Row: {
+          created_at: string
+          description: string | null
+          experience: string | null
+          id: string
+          is_available: boolean
+          is_visible: boolean
+          name: string
+          phone: string | null
+          photo_url: string | null
+          qualifications: string | null
+          sort_order: number
+          specialty: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          experience?: string | null
+          id?: string
+          is_available?: boolean
+          is_visible?: boolean
+          name: string
+          phone?: string | null
+          photo_url?: string | null
+          qualifications?: string | null
+          sort_order?: number
+          specialty?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          experience?: string | null
+          id?: string
+          is_available?: boolean
+          is_visible?: boolean
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          qualifications?: string | null
+          sort_order?: number
+          specialty?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       faqs: {
         Row: {
           answer: string
@@ -217,6 +268,33 @@ export type Database = {
           is_active?: boolean
           stats?: Json
           subheading?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      homepage_sections: {
+        Row: {
+          id: string
+          is_visible: boolean
+          key: string
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          is_visible?: boolean
+          key: string
+          label: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          is_visible?: boolean
+          key?: string
+          label?: string
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []

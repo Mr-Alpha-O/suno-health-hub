@@ -7,12 +7,14 @@ import {
   getProductBySlug,
   getAbout,
   getTeam,
+  getDoctors,
   getTestimonials,
   getFaqs,
   getSiteStats,
   getJobsPublic,
   getContactInfo,
   getNavItems,
+  getHomepageSections,
   getSiteSettings,
 } from "./public.functions";
 
@@ -23,10 +25,12 @@ export const productsQO = queryOptions({ queryKey: ["public", "products"], query
 export const productBySlugQO = (slug: string) => queryOptions({ queryKey: ["public", "product", slug], queryFn: () => getProductBySlug({ data: { slug } }) });
 export const aboutQO = queryOptions({ queryKey: ["public", "about"], queryFn: () => getAbout() });
 export const teamQO = queryOptions({ queryKey: ["public", "team"], queryFn: () => getTeam() });
+export const doctorsQO = queryOptions({ queryKey: ["public", "doctors"], queryFn: () => getDoctors() });
 export const testimonialsQO = queryOptions({ queryKey: ["public", "testimonials"], queryFn: () => getTestimonials() });
 export const faqsQO = queryOptions({ queryKey: ["public", "faqs"], queryFn: () => getFaqs() });
 export const siteStatsQO = queryOptions({ queryKey: ["public", "siteStats"], queryFn: () => getSiteStats() });
 export const jobsQO = queryOptions({ queryKey: ["public", "jobs"], queryFn: () => getJobsPublic() });
 export const contactQO = queryOptions({ queryKey: ["public", "contact"], queryFn: () => getContactInfo(), staleTime: 60_000 });
 export const navQO = queryOptions({ queryKey: ["public", "nav"], queryFn: () => getNavItems(), staleTime: 60_000 });
+export const sectionsQO = queryOptions({ queryKey: ["public", "sections"], queryFn: () => getHomepageSections(), staleTime: 60_000 });
 export const settingsQO = queryOptions({ queryKey: ["public", "settings"], queryFn: () => getSiteSettings(), staleTime: 60_000 });

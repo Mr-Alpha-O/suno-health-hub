@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, MessageCircle, Stethoscope, Ambulance, ShieldCheck, Clock, MapPin, HeartPulse, Microscope, Package, Sparkles, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, MessageCircle, Stethoscope, Ambulance, ShieldCheck, Clock, MapPin, HeartPulse, Microscope, Package, Sparkles, ChevronDown, Phone, MessageSquareQuote, HelpCircle, BarChart3 } from "lucide-react";
+import { Fragment, useState } from "react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { site } from "@/lib/site";
-import { heroQO, whyUsQO, serviceCategoriesQO, contactQO } from "@/lib/public-queries";
+import {
+  heroQO, whyUsQO, serviceCategoriesQO, contactQO,
+  doctorsQO, testimonialsQO, faqsQO, siteStatsQO, sectionsQO,
+} from "@/lib/public-queries";
 import { heroImageFallback, ambulanceImage, equipmentImage, waLinkFor } from "@/lib/media";
 
 export const Route = createFileRoute("/")({
@@ -23,6 +26,11 @@ export const Route = createFileRoute("/")({
       context.queryClient.ensureQueryData(whyUsQO),
       context.queryClient.ensureQueryData(serviceCategoriesQO),
       context.queryClient.ensureQueryData(contactQO),
+      context.queryClient.ensureQueryData(sectionsQO),
+      context.queryClient.ensureQueryData(doctorsQO),
+      context.queryClient.ensureQueryData(testimonialsQO),
+      context.queryClient.ensureQueryData(faqsQO),
+      context.queryClient.ensureQueryData(siteStatsQO),
     ]);
   },
   component: Index,
@@ -37,7 +45,6 @@ const iconMap = {
   ambulance: Ambulance,
   equipment: Package,
 } as const;
-
 type IconKey = keyof typeof iconMap;
 function iconFor(key: string | null | undefined): IconKey {
   return (key && key in iconMap ? key : "nursing") as IconKey;
@@ -48,15 +55,21 @@ function Index() {
   const { data: whyUs } = useSuspenseQuery(whyUsQO);
   const { data: categories } = useSuspenseQuery(serviceCategoriesQO);
   const { data: contact } = useSuspenseQuery(contactQO);
+  const { data: sections } = useSuspenseQuery(sectionsQO);
+  const { data: doctors } = useSuspenseQuery(doctorsQO);
+  const { data: testimonials } = useSuspenseQuery(testimonialsQO);
+  const { data: faqs } = useSuspenseQuery(faqsQO);
+  const { data: stats } = useSuspenseQuery(siteStatsQO);
+
   const phone = contact?.phone ?? site.phone;
   const phoneIntl = contact?.phone_intl ?? site.phoneIntl;
   const whatsapp = contact?.whatsapp ?? site.whatsapp;
   const heroImg = (hero?.image_url && hero.image_url.trim()) || heroImageFallback;
-  const stats = Array.isArray(hero?.stats) ? (hero!.stats as Array<{ value: string; label: string }>) : [];
+  const heroStats = Array.isArray(hero?.stats) ? (hero!.stats as Array<{ value: string; label: string }>) : [];
 
-  return (
-    <>
-      {/* HERO */}
+  // Renderers keyed by section key. Original markup preserved exactly.
+  const renderers: Record<string, () => React.ReactNode> = {
+    hero: () => (
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-soft" />
         <div className="absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full bg-primary-glow/20 blur-3xl" />
@@ -84,7 +97,7 @@ function Index() {
               </a>
             </div>
             <div className="mt-10 grid grid-cols-3 gap-4 max-w-md">
-              {stats.map((s) => (
+              {heroStats.map((s) => (
                 <div key={s.label} className="text-center bg-white/70 backdrop-blur rounded-xl py-3 shadow-soft">
                   <div className="text-2xl font-extrabold text-primary">{s.value}</div>
                   <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
@@ -117,8 +130,9 @@ function Index() {
           </div>
         </div>
       </section>
+    ),
 
-      {/* SERVICES */}
+    services: () => (
       <section className="container mx-auto px-4 py-20">
         <SectionHeading
           eyebrow="خدماتنا"
@@ -136,8 +150,9 @@ function Index() {
           </Link>
         </div>
       </section>
+    ),
 
-      {/* WHY US */}
+    why_us: () => (
       <section className="relative overflow-hidden bg-gradient-soft py-20">
         <div className="container mx-auto px-4">
           <SectionHeading eyebrow="لماذا سونو" title="ثقتك هي عنوان نجاحنا" desc="نلتزم بأعلى معايير الجودة لنقدم خدمة طبية تستحقها أنت وعائلتك." />
@@ -158,8 +173,9 @@ function Index() {
           </div>
         </div>
       </section>
+    ),
 
-      {/* AMBULANCE BANNER */}
+    ambulance: () => (
       <section className="container mx-auto px-4 py-20">
         <div className="relative rounded-3xl overflow-hidden shadow-elegant grid lg:grid-cols-2 bg-gradient-hero">
           <div className="p-10 md:p-14 text-primary-foreground flex flex-col justify-center">
@@ -182,8 +198,9 @@ function Index() {
           </div>
         </div>
       </section>
+    ),
 
-      {/* STORE TEASER */}
+    store: () => (
       <section className="container mx-auto px-4 pb-20">
         <div className="grid lg:grid-cols-2 gap-10 items-center">
           <div>
@@ -197,6 +214,116 @@ function Index() {
           </div>
         </div>
       </section>
+    ),
+
+    doctors: () => doctors.length === 0 ? null : (
+      <section className="container mx-auto px-4 py-20">
+        <SectionHeading eyebrow="فريقنا الطبي" title="أطباء بخبرة تثق بها" desc="نخبة من الأطباء لخدمتك في المنزل أو عبر الاستشارة." />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {doctors.map((d) => (
+            <div key={d.id} className="bg-white rounded-2xl p-6 border border-border shadow-soft hover:shadow-elegant transition-smooth text-center">
+              {d.photo_url ? (
+                <img src={d.photo_url} alt={d.name} className="mx-auto h-24 w-24 rounded-full object-cover mb-4" loading="lazy" />
+              ) : (
+                <div className="mx-auto h-24 w-24 rounded-full bg-secondary text-primary flex items-center justify-center mb-4"><Stethoscope className="h-10 w-10" /></div>
+              )}
+              <h4 className="font-extrabold">{d.name}</h4>
+              {d.specialty && <p className="text-xs text-primary font-bold mt-1">{d.specialty}</p>}
+              {d.experience && <p className="mt-2 text-xs text-muted-foreground leading-6">{d.experience}</p>}
+              {d.whatsapp && (
+                <a href={waLinkFor(d.whatsapp, `أرغب في حجز استشارة مع د. ${d.name}`)} target="_blank" rel="noopener" className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-primary">
+                  <MessageCircle className="h-3 w-3" /> احجز استشارة
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+    ),
+
+    stats: () => stats.length === 0 ? null : (
+      <section className="container mx-auto px-4 py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {stats.map((s) => (
+            <div key={s.id} className="bg-white rounded-2xl p-6 text-center shadow-soft border border-border/60">
+              <BarChart3 className="mx-auto h-6 w-6 text-primary mb-2" />
+              <div className="text-3xl font-extrabold text-primary">{s.value}</div>
+              <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+    ),
+
+    testimonials: () => testimonials.length === 0 ? null : (
+      <section className="bg-gradient-soft py-20">
+        <div className="container mx-auto px-4">
+          <SectionHeading eyebrow="آراء العملاء" title="ماذا قال عنّا مرضانا" desc="" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {testimonials.map((t) => (
+              <div key={t.id} className="bg-white rounded-2xl p-6 shadow-soft border border-border/60">
+                <MessageSquareQuote className="h-6 w-6 text-primary" />
+                <p className="mt-3 text-sm text-foreground leading-7">"{t.quote}"</p>
+                <div className="mt-4 text-sm font-extrabold">{t.author}</div>
+                {t.role && <div className="text-xs text-muted-foreground">{t.role}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    ),
+
+    faqs: () => faqs.length === 0 ? null : (
+      <section className="container mx-auto px-4 py-20">
+        <SectionHeading eyebrow="أسئلة شائعة" title="أجوبة سريعة عن أهم استفساراتك" desc="" />
+        <div className="max-w-3xl mx-auto space-y-3">
+          {faqs.map((f) => (
+            <details key={f.id} className="bg-white rounded-xl border border-border p-4 shadow-soft group">
+              <summary className="cursor-pointer flex items-center justify-between gap-3 font-bold text-foreground">
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary" /> {f.question}</span>
+                <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+              </summary>
+              <p className="mt-3 text-sm text-muted-foreground leading-7">{f.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    ),
+
+    contact: () => (
+      <section className="container mx-auto px-4 py-16">
+        <div className="rounded-3xl bg-white border border-border shadow-elegant p-8 md:p-12 grid md:grid-cols-3 gap-6 text-center">
+          <a href={`tel:${phoneIntl}`} className="flex flex-col items-center gap-2 hover:text-primary transition-smooth">
+            <Phone className="h-6 w-6 text-primary" />
+            <div className="font-extrabold">{phone}</div>
+            <div className="text-xs text-muted-foreground">اتصل بنا مباشرة</div>
+          </a>
+          <a href={waLinkFor(whatsapp)} target="_blank" rel="noopener" className="flex flex-col items-center gap-2 hover:text-primary transition-smooth">
+            <MessageCircle className="h-6 w-6 text-primary" />
+            <div className="font-extrabold">واتساب</div>
+            <div className="text-xs text-muted-foreground">{whatsapp}</div>
+          </a>
+          <Link to="/contact" className="flex flex-col items-center gap-2 hover:text-primary transition-smooth">
+            <MapPin className="h-6 w-6 text-primary" />
+            <div className="font-extrabold">صفحة التواصل</div>
+            <div className="text-xs text-muted-foreground">العنوان وساعات العمل</div>
+          </Link>
+        </div>
+      </section>
+    ),
+  };
+
+  const defaultKeys = ["hero","services","why_us","ambulance","store","doctors","stats","testimonials","faqs","contact"];
+  const configured = (sections ?? []).length > 0
+    ? sections.filter((s) => s.is_visible).map((s) => s.key)
+    : defaultKeys;
+
+  return (
+    <>
+      {configured.map((key) => {
+        const R = renderers[key];
+        return R ? <Fragment key={key}>{R()}</Fragment> : null;
+      })}
     </>
   );
 }
