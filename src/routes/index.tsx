@@ -329,12 +329,13 @@ function Index() {
 }
 
 type CategoryWithSubs = {
-  slug: string;
+  slug: string | null;
   name: string;
   description: string | null;
   icon: string | null;
   subs: Array<{ id: string; name: string; featured: boolean | null }>;
 };
+
 
 function CategoryCard({ cat }: { cat: CategoryWithSubs }) {
   const [open, setOpen] = useState(false);

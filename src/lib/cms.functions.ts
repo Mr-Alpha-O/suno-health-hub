@@ -37,7 +37,8 @@ export const upsertHero = createServerFn({ method: "POST" })
 const WhySchema = z.object({
   id: z.string().uuid().optional(),
   title: z.string().min(1),
-  description: z.string().min(1),
+  description: z.string().nullable().optional(),
+
   icon: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
@@ -108,7 +109,7 @@ const TestSchema = z.object({
   id: z.string().uuid().optional(),
   author: z.string().min(1),
   role: z.string().nullable().optional(),
-  quote: z.string().min(1),
+  quote: z.string().nullable().optional(),
   rating: z.number().int().min(1).max(5).default(5),
   photo_url: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
@@ -131,7 +132,7 @@ export const deleteTestimonial = createServerFn({ method: "POST" }).middleware([
 const FaqSchema = z.object({
   id: z.string().uuid().optional(),
   question: z.string().min(1),
-  answer: z.string().min(1),
+  answer: z.string().nullable().optional(),
   category: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
@@ -153,7 +154,7 @@ export const deleteFaq = createServerFn({ method: "POST" }).middleware([requireS
 const StatSchema = z.object({
   id: z.string().uuid().optional(),
   label: z.string().min(1),
-  value: z.string().min(1),
+  value: z.string().nullable().optional(),
   icon: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
@@ -175,7 +176,8 @@ export const deleteStat = createServerFn({ method: "POST" }).middleware([require
 const JobSchema = z.object({
   id: z.string().uuid().optional(),
   title: z.string().min(1),
-  description: z.string().min(1),
+  description: z.string().nullable().optional(),
+
   department: z.string().nullable().optional(),
   employment_type: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
