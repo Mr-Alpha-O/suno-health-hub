@@ -59,13 +59,14 @@ function ServicesPage() {
 
 type CategoryBlockProps = {
   cat: {
-    slug: string;
+    slug: string | null;
     name: string;
     description: string | null;
     icon: string | null;
     subs: Array<{ id: string; name: string; featured: boolean | null }>;
   };
 };
+
 
 function CategoryBlock({ cat }: CategoryBlockProps) {
   const Icon = iconMap[iconFor(cat.icon)];
