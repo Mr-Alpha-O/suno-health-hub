@@ -68,7 +68,7 @@ function Index() {
   const heroStats = Array.isArray(hero?.stats) ? (hero!.stats as Array<{ value: string; label: string }>) : [];
 
   // Renderers keyed by section key. Original markup preserved exactly.
-  const renderers: Record<string, () => JSX.Element | null> = {
+  const renderers: Record<string, () => React.ReactNode> = {
     hero: () => (
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-soft" />
