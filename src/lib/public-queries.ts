@@ -13,6 +13,7 @@ import {
   getSiteStats,
   getJobsPublic,
   getContactInfo,
+  getContactCollections,
   getNavItems,
   getHomepageSections,
   getSiteSettings,
@@ -31,6 +32,7 @@ export const faqsQO = queryOptions({ queryKey: ["public", "faqs"], queryFn: () =
 export const siteStatsQO = queryOptions({ queryKey: ["public", "siteStats"], queryFn: () => getSiteStats() });
 export const jobsQO = queryOptions({ queryKey: ["public", "jobs"], queryFn: () => getJobsPublic() });
 export const contactQO = queryOptions({ queryKey: ["public", "contact"], queryFn: () => getContactInfo(), staleTime: 60_000 });
+export const contactCollectionsQO = queryOptions({ queryKey: ["public", "contactCollections"], queryFn: () => getContactCollections(), staleTime: 60_000 });
 export const navQO = queryOptions({ queryKey: ["public", "nav"], queryFn: () => getNavItems(), staleTime: 60_000 });
 export const sectionsQO = queryOptions({ queryKey: ["public", "sections"], queryFn: () => getHomepageSections(), staleTime: 60_000 });
 export const settingsQO = queryOptions({ queryKey: ["public", "settings"], queryFn: () => getSiteSettings(), staleTime: 60_000 });

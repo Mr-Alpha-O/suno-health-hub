@@ -47,10 +47,9 @@ function ProductsPage() {
     try { await del({ data: { id } }); toast.success("تم الحذف"); load(); } catch (e: any) { toast.error(e.message); }
   }
   async function addNew() {
-    const slug = prompt("Slug فريد (بالإنجليزية)")?.trim();
-    const name = prompt("اسم المنتج")?.trim();
-    if (!slug || !name) return;
-    await save({ slug, name, details: [], is_available: true, is_visible: true, sort_order: items.length });
+    const name = prompt("اسم المنتج (الحقل الوحيد المطلوب)")?.trim();
+    if (!name) return;
+    await save({ name, details: [], is_available: true, is_visible: true, sort_order: items.length });
   }
 
   const filtered = items.filter((i) => !q || (i.name + " " + i.slug + " " + (i.category ?? "")).toLowerCase().includes(q.toLowerCase()));

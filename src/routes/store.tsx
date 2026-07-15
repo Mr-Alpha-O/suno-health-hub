@@ -64,12 +64,13 @@ function StorePage() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {list.map((p) => {
-            const img = productImage(p.slug, p.image);
+            const slug = p.slug ?? "";
+            const img = productImage(slug, p.image);
             const buy = Number(p.buy_price ?? 0);
             const rent = Number(p.rent_price ?? 0);
             return (
-              <div key={p.slug} className="group bg-white rounded-2xl border border-border shadow-soft hover:shadow-elegant overflow-hidden transition-smooth hover:-translate-y-1">
-                <Link to="/store/$slug" params={{ slug: p.slug }} className="block aspect-square overflow-hidden bg-secondary/30">
+              <div key={p.id ?? slug} className="group bg-white rounded-2xl border border-border shadow-soft hover:shadow-elegant overflow-hidden transition-smooth hover:-translate-y-1">
+                <Link to="/store/$slug" params={{ slug }} className="block aspect-square overflow-hidden bg-secondary/30">
                   <img src={img} alt={p.name} width={800} height={800} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-smooth" />
                 </Link>
                 <div className="p-5">

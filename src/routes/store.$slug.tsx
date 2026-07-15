@@ -38,7 +38,7 @@ function ProductPage() {
   const { data: contact } = useSuspenseQuery(contactQO);
   if (!p) return null;
   const whatsapp = contact?.whatsapp ?? site.whatsapp;
-  const mainImg = productImage(p.slug, p.image);
+  const mainImg = productImage(p.slug ?? "", p.image);
   const gallery = [mainImg, ...((p as any).images ?? []).map((i: any) => i.url as string)].filter(Boolean);
   const [active, setActive] = useState(0);
   const buy = Number(p.buy_price ?? 0);
