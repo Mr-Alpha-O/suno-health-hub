@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Phone, Mail, MessageCircle, MapPin, Send } from "lucide-react";
 import { site } from "@/lib/site";
 import { useServerFn } from "@tanstack/react-start";
 import { submitContactMessage } from "@/lib/public.functions";
-import { contactQO } from "@/lib/public-queries";
+import { contactQO, contactCollectionsQO } from "@/lib/public-queries";
 import { waLinkFor } from "@/lib/media";
 import { z } from "zod";
 
@@ -34,12 +34,24 @@ const schema = z.object({
 
 function ContactPage() {
   const { data: contact } = useSuspenseQuery(contactQO);
-  const phone = contact?.phone ?? site.phone;
-  const phoneIntl = contact?.phone_intl ?? site.phoneIntl;
-  const whatsapp = contact?.whatsapp ?? site.whatsapp;
-  const email = contact?.email ?? site.email;
-  const address = contact?.address ?? "القاهرة الكبرى";
-  const mapEmbed = contact?.map_embed?.trim() || "https://www.google.com/maps?q=Cairo,Egypt&output=embed";
+  const { data: coll } = useQuery(contactCollectionsQO);
+
+  const phones = coll?.phones ?? [];
+  const whatsapps = coll?.whatsapps ?? [];
+  const emails = coll?.emails ?? [];
+  const branches = coll?.branches ?? [];
+  const primaryPhone = phones.find((p) => p.is_primary) ?? phones[0];
+  const primaryWa = whatsapps.find((p) => p.is_primary) ?? whatsapps[0];
+  const primaryEmail = emails.find((p) => p.is_primary) ?? emails[0];
+  const primaryBranch = branches.find((p) => p.is_primary) ?? branches[0];
+
+  const phoneDisplay = primaryPhone?.value ?? contact?.phone ?? site.phone;
+  const phoneTel = primaryPhone?.value_intl ?? primaryPhone?.value ?? contact?.phone_intl ?? site.phoneIntl;
+  const whatsapp = primaryWa?.value ?? contact?.whatsapp ?? site.whatsapp;
+  const email = primaryEmail?.value ?? contact?.email ?? site.email;
+  const address = primaryBranch?.address ?? contact?.address ?? "القاهرة الكبرى";
+  const mapEmbed = (primaryBranch?.map_embed ?? contact?.map_embed ?? "").trim() || "https://www.google.com/maps?q=Cairo,Egypt&output=embed";
+
   const [f, setF] = useState({ name: "", phone: "", message: "" });
   const submitFn = useServerFn(submitContactMessage);
   const submit = async (e: React.FormEvent) => {
@@ -64,8 +76,8 @@ function ContactPage() {
 
       <section className="container mx-auto px-4 py-12 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: Phone, title: "اتصل بنا", val: phone, href: `tel:${phoneIntl}` },
-          { icon: MessageCircle, title: "واتساب", val: phone, href: waLinkFor(whatsapp) },
+          { icon: Phone, title: "اتصل بنا", val: phoneDisplay, href: `tel:${phoneTel}` },
+          { icon: MessageCircle, title: "واتساب", val: phoneDisplay, href: waLinkFor(whatsapp) },
           { icon: Mail, title: "البريد الإلكتروني", val: email, href: `mailto:${email}` },
           { icon: MapPin, title: "موقعنا", val: address, href: "#map" },
         ].map(({ icon: Icon, title, val, href }) => (
@@ -78,6 +90,43 @@ function ContactPage() {
           </a>
         ))}
       </section>
+
+      {(phones.length + whatsapps.length + emails.length + branches.length) > 4 && (
+        <section className="container mx-auto px-4 pb-4 grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+          {phones.length > 1 && (
+            <div className="bg-white rounded-2xl p-5 border border-border shadow-soft">
+              <div className="font-bold mb-2 flex items-center gap-2"><Phone className="h-4 w-4" /> جميع الأرقام</div>
+              <ul className="space-y-1">{phones.map((p) => (
+                <li key={p.id} dir="ltr"><a href={`tel:${p.value_intl ?? p.value}`} className="hover:text-primary">{p.value}</a> {p.label ? <span className="text-xs text-muted-foreground">({p.label})</span> : null}</li>
+              ))}</ul>
+            </div>
+          )}
+          {whatsapps.length > 1 && (
+            <div className="bg-white rounded-2xl p-5 border border-border shadow-soft">
+              <div className="font-bold mb-2 flex items-center gap-2"><MessageCircle className="h-4 w-4" /> جميع أرقام واتساب</div>
+              <ul className="space-y-1">{whatsapps.map((w) => (
+                <li key={w.id} dir="ltr"><a href={waLinkFor(w.value)} target="_blank" rel="noopener" className="hover:text-primary">{w.value}</a> {w.label ? <span className="text-xs text-muted-foreground">({w.label})</span> : null}</li>
+              ))}</ul>
+            </div>
+          )}
+          {emails.length > 1 && (
+            <div className="bg-white rounded-2xl p-5 border border-border shadow-soft">
+              <div className="font-bold mb-2 flex items-center gap-2"><Mail className="h-4 w-4" /> جميع عناوين البريد</div>
+              <ul className="space-y-1">{emails.map((e) => (
+                <li key={e.id} dir="ltr" className="break-all"><a href={`mailto:${e.value}`} className="hover:text-primary">{e.value}</a> {e.label ? <span className="text-xs text-muted-foreground">({e.label})</span> : null}</li>
+              ))}</ul>
+            </div>
+          )}
+          {branches.length > 1 && (
+            <div className="bg-white rounded-2xl p-5 border border-border shadow-soft">
+              <div className="font-bold mb-2 flex items-center gap-2"><MapPin className="h-4 w-4" /> فروعنا</div>
+              <ul className="space-y-2">{branches.map((b) => (
+                <li key={b.id}><div className="font-bold">{b.name ?? "فرع"}</div><div className="text-muted-foreground">{b.address}</div>{b.hours ? <div className="text-xs text-muted-foreground">{b.hours}</div> : null}</li>
+              ))}</ul>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="container mx-auto px-4 pb-12 grid lg:grid-cols-2 gap-8">
         <form onSubmit={submit} className="bg-white rounded-2xl shadow-soft border border-border p-6 md:p-8 space-y-5">
