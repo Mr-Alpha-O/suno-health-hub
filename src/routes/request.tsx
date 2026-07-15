@@ -160,9 +160,10 @@ function RequestPage() {
                 className={inp}
               >
                 <option value="">اختر القسم</option>
-                {categories.map((c) => (
-                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                {categories.filter((c) => c.slug).map((c) => (
+                  <option key={c.slug!} value={c.slug!}>{c.name}</option>
                 ))}
+
                 <option value={OTHER_SLUG}>{OTHER_NAME}</option>
               </select>
             </Field>
