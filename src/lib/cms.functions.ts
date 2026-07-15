@@ -176,7 +176,8 @@ export const deleteStat = createServerFn({ method: "POST" }).middleware([require
 const JobSchema = z.object({
   id: z.string().uuid().optional(),
   title: z.string().min(1),
-  description: z.string().min(1),
+  description: z.string().nullable().optional(),
+
   department: z.string().nullable().optional(),
   employment_type: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
