@@ -37,7 +37,8 @@ export const upsertHero = createServerFn({ method: "POST" })
 const WhySchema = z.object({
   id: z.string().uuid().optional(),
   title: z.string().min(1),
-  description: z.string().min(1),
+  description: z.string().nullable().optional(),
+
   icon: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
   is_visible: z.boolean().default(true),
