@@ -346,7 +346,7 @@ export type Database = {
       }
       faqs: {
         Row: {
-          answer: string
+          answer: string | null
           category: string | null
           created_at: string
           id: string
@@ -356,7 +356,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          answer: string
+          answer?: string | null
           category?: string | null
           created_at?: string
           id?: string
@@ -366,7 +366,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          answer?: string
+          answer?: string | null
           category?: string | null
           created_at?: string
           id?: string
@@ -501,7 +501,7 @@ export type Database = {
         Row: {
           created_at: string
           department: string | null
-          description: string
+          description: string | null
           employment_type: string | null
           id: string
           is_open: boolean
@@ -513,7 +513,7 @@ export type Database = {
         Insert: {
           created_at?: string
           department?: string | null
-          description: string
+          description?: string | null
           employment_type?: string | null
           id?: string
           is_open?: boolean
@@ -525,7 +525,7 @@ export type Database = {
         Update: {
           created_at?: string
           department?: string | null
-          description?: string
+          description?: string | null
           employment_type?: string | null
           id?: string
           is_open?: boolean
@@ -669,7 +669,7 @@ export type Database = {
           id: string
           is_visible: boolean
           name: string
-          slug: string
+          slug: string | null
           sort_order: number
           updated_at: string
         }
@@ -680,7 +680,7 @@ export type Database = {
           id?: string
           is_visible?: boolean
           name: string
-          slug: string
+          slug?: string | null
           sort_order?: number
           updated_at?: string
         }
@@ -691,7 +691,7 @@ export type Database = {
           id?: string
           is_visible?: boolean
           name?: string
-          slug?: string
+          slug?: string | null
           sort_order?: number
           updated_at?: string
         }
@@ -804,7 +804,7 @@ export type Database = {
           label: string
           sort_order: number
           updated_at: string
-          value: string
+          value: string | null
         }
         Insert: {
           created_at?: string
@@ -814,7 +814,7 @@ export type Database = {
           label: string
           sort_order?: number
           updated_at?: string
-          value: string
+          value?: string | null
         }
         Update: {
           created_at?: string
@@ -824,7 +824,7 @@ export type Database = {
           label?: string
           sort_order?: number
           updated_at?: string
-          value?: string
+          value?: string | null
         }
         Relationships: []
       }
@@ -871,7 +871,7 @@ export type Database = {
           id: string
           is_visible: boolean
           photo_url: string | null
-          quote: string
+          quote: string | null
           rating: number
           role: string | null
           sort_order: number
@@ -883,7 +883,7 @@ export type Database = {
           id?: string
           is_visible?: boolean
           photo_url?: string | null
-          quote: string
+          quote?: string | null
           rating?: number
           role?: string | null
           sort_order?: number
@@ -895,7 +895,7 @@ export type Database = {
           id?: string
           is_visible?: boolean
           photo_url?: string | null
-          quote?: string
+          quote?: string | null
           rating?: number
           role?: string | null
           sort_order?: number
@@ -927,7 +927,7 @@ export type Database = {
       why_us_items: {
         Row: {
           created_at: string
-          description: string
+          description: string | null
           icon: string | null
           id: string
           is_visible: boolean
@@ -937,7 +937,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          description: string
+          description?: string | null
           icon?: string | null
           id?: string
           is_visible?: boolean
@@ -947,7 +947,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          description?: string
+          description?: string | null
           icon?: string | null
           id?: string
           is_visible?: boolean
