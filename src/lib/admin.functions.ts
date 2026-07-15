@@ -114,7 +114,7 @@ export const deleteSub = createServerFn({ method: "POST" })
 // ---------- Products ----------
 const ProductSchema = z.object({
   id: z.string().uuid().optional(),
-  slug: z.string().min(1),
+  slug: z.string().nullable().optional(),
   name: z.string().min(1),
   category: z.string().nullable().optional(),
   image: z.string().nullable().optional(),
@@ -130,6 +130,14 @@ const ProductSchema = z.object({
   sort_order: z.number().int().default(0),
 });
 
+function slugifyName(name: string): string {
+  const base = name.trim().toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  return (base || "item") + "-" + Math.random().toString(36).slice(2, 7);
+}
+
 export const listProducts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -142,7 +150,20 @@ export const upsertProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(ProductSchema)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("products").upsert(data);
+    const row: Record<string, unknown> = { ...data };
+    // Auto-generate slug when not provided (uniqueness enforced by DB retry)
+    if (!data.id && (!data.slug || !data.slug.trim())) {
+      let attempt = slugifyName(data.name);
+      for (let i = 0; i < 5; i++) {
+        const { data: existing } = await context.supabase.from("products").select("id").eq("slug", attempt).maybeSingle();
+        if (!existing) break;
+        attempt = slugifyName(data.name);
+      }
+      row.slug = attempt;
+    } else if (data.slug === "" || data.slug === null) {
+      delete row.slug;
+    }
+    const { error } = await context.supabase.from("products").upsert(row as never);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
