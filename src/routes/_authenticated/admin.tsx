@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { checkIsAdmin } from "@/lib/admin.functions";
-import { LayoutDashboard, Settings, Package, ListTree, Image as ImageIcon, LogOut, Loader2, Sparkles, Info, Users, MessageSquareQuote, HelpCircle, BarChart3, Briefcase, Phone, Menu, Inbox, Search, Stethoscope, LayoutList } from "lucide-react";
+import { getDashboardCounts } from "@/lib/cms.functions";
+import { logActivity } from "@/lib/activity-log.functions";
+import { LayoutDashboard, Settings, Package, ListTree, Image as ImageIcon, LogOut, Loader2, Sparkles, Info, Users, MessageSquareQuote, HelpCircle, BarChart3, Briefcase, Phone, Menu, Inbox, Search, Stethoscope, LayoutList, Database, ScrollText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
