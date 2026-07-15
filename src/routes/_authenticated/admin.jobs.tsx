@@ -16,7 +16,7 @@ function Page() {
   useEffect(() => { load(); }, []);
   async function save(r: Row) { try { await u({ data: r }); toast.success("تم"); load(); } catch (e) { toast.error((e as Error).message); } }
   async function remove(id?: string) { if (!id || !confirm("حذف؟")) return; try { await d({ data: { id } }); toast.success("تم"); load(); } catch (e) { toast.error((e as Error).message); } }
-  async function add() { const title = prompt("عنوان الوظيفة"); const description = prompt("الوصف"); if (!title || !description) return; await save({ title, description, department: "", employment_type: "", location: "", is_open: true, sort_order: rows.length }); }
+  async function add() { const title = prompt("عنوان الوظيفة"); if (!title) return; await save({ title, description: "", department: "", employment_type: "", location: "", is_open: true, sort_order: rows.length }); }
 
   return (
     <div className="space-y-4" dir="rtl">
