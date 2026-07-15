@@ -108,6 +108,22 @@ export const getContactInfo = createServerFn({ method: "GET" }).handler(async ()
   return data;
 });
 
+export const getContactCollections = createServerFn({ method: "GET" }).handler(async () => {
+  const sb = anonClient() as any;
+  const [phones, whatsapps, emails, branches] = await Promise.all([
+    sb.from("contact_phones").select("*").eq("is_visible", true).order("sort_order"),
+    sb.from("contact_whatsapps").select("*").eq("is_visible", true).order("sort_order"),
+    sb.from("contact_emails").select("*").eq("is_visible", true).order("sort_order"),
+    sb.from("contact_branches").select("*").eq("is_visible", true).order("sort_order"),
+  ]);
+  return {
+    phones: (phones.data ?? []) as Array<{ id: string; label: string | null; value: string; value_intl: string | null; is_primary: boolean; sort_order: number }>,
+    whatsapps: (whatsapps.data ?? []) as Array<{ id: string; label: string | null; value: string; is_primary: boolean; sort_order: number }>,
+    emails: (emails.data ?? []) as Array<{ id: string; label: string | null; value: string; is_primary: boolean; sort_order: number }>,
+    branches: (branches.data ?? []) as Array<{ id: string; name: string | null; address: string; phone: string | null; hours: string | null; map_embed: string | null; is_primary: boolean; sort_order: number }>,
+  };
+});
+
 export const getNavItems = createServerFn({ method: "GET" }).handler(async () => {
   const sb = anonClient();
   const { data } = await sb.from("nav_items").select("*").eq("is_visible", true).order("sort_order");
