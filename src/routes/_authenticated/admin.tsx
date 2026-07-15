@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 const links = [
   { to: "/admin", label: "الرئيسية", icon: LayoutDashboard, exact: true },
-  { to: "/admin/submissions", label: "صندوق الوارد", icon: Inbox },
+  { to: "/admin/submissions", label: "صندوق الوارد", icon: Inbox, badgeKey: "inbox" as const },
   { to: "/admin/homepage", label: "أقسام الصفحة الرئيسية", icon: LayoutList },
   { to: "/admin/hero", label: "قسم البداية", icon: Sparkles },
   { to: "/admin/why-us", label: "لماذا نحن", icon: LayoutDashboard },
@@ -33,22 +33,45 @@ const links = [
   { to: "/admin/nav", label: "روابط التنقل", icon: Menu },
   { to: "/admin/media", label: "الوسائط", icon: ImageIcon },
   { to: "/admin/seo", label: "SEO", icon: Search },
+  { to: "/admin/backup", label: "النسخ الاحتياطي", icon: Database },
+  { to: "/admin/logs", label: "سجل النشاط", icon: ScrollText },
   { to: "/admin/settings", label: "إعدادات عامة", icon: Settings },
 ];
 
 function AdminLayout() {
   const navigate = useNavigate();
   const check = useServerFn(checkIsAdmin);
+  const countsFn = useServerFn(getDashboardCounts);
+  const logFn = useServerFn(logActivity);
   const [status, setStatus] = useState<"loading" | "ok" | "denied">("loading");
+  const [inboxCount, setInboxCount] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
     check()
-      .then((r) => setStatus(r.isAdmin ? "ok" : "denied"))
+      .then((r) => {
+        setStatus(r.isAdmin ? "ok" : "denied");
+        if (r.isAdmin) { logFn({ data: { action: "login" } }).catch(() => {}); }
+      })
       .catch(() => setStatus("denied"));
-  }, [check]);
+  }, [check, logFn]);
+
+  useEffect(() => {
+    if (status !== "ok") return;
+    const refresh = () => countsFn().then((d) => {
+      const inbox = d?.newInbox ?? {};
+      setInboxCount((inbox.service_submissions ?? 0) + (inbox.job_applications ?? 0) + (inbox.contact_messages ?? 0));
+    }).catch(() => {});
+    refresh();
+    const t = setInterval(refresh, 60_000);
+    return () => clearInterval(t);
+  }, [status, countsFn, pathname]);
+
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   async function signOut() {
+    logFn({ data: { action: "logout" } }).catch(() => {});
     await supabase.auth.signOut();
     toast.success("تم تسجيل الخروج");
     navigate({ to: "/auth" });

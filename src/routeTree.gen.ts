@@ -33,12 +33,14 @@ import { Route as AuthenticatedAdminSeoRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
 import { Route as AuthenticatedAdminNavRouteImport } from './routes/_authenticated/admin.nav'
 import { Route as AuthenticatedAdminMediaRouteImport } from './routes/_authenticated/admin.media'
+import { Route as AuthenticatedAdminLogsRouteImport } from './routes/_authenticated/admin.logs'
 import { Route as AuthenticatedAdminJobsRouteImport } from './routes/_authenticated/admin.jobs'
 import { Route as AuthenticatedAdminHomepageRouteImport } from './routes/_authenticated/admin.homepage'
 import { Route as AuthenticatedAdminHeroRouteImport } from './routes/_authenticated/admin.hero'
 import { Route as AuthenticatedAdminFaqsRouteImport } from './routes/_authenticated/admin.faqs'
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin.doctors'
 import { Route as AuthenticatedAdminContactRouteImport } from './routes/_authenticated/admin.contact'
+import { Route as AuthenticatedAdminBackupRouteImport } from './routes/_authenticated/admin.backup'
 import { Route as AuthenticatedAdminAboutRouteImport } from './routes/_authenticated/admin.about'
 
 const StoreRoute = StoreRouteImport.update({
@@ -165,6 +167,11 @@ const AuthenticatedAdminMediaRoute = AuthenticatedAdminMediaRouteImport.update({
   path: '/media',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminLogsRoute = AuthenticatedAdminLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminJobsRoute = AuthenticatedAdminJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
@@ -198,6 +205,12 @@ const AuthenticatedAdminContactRoute =
     path: '/contact',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminBackupRoute =
+  AuthenticatedAdminBackupRouteImport.update({
+    id: '/backup',
+    path: '/backup',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAboutRoute = AuthenticatedAdminAboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -217,12 +230,14 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/store/$slug': typeof StoreSlugRoute
   '/admin/about': typeof AuthenticatedAdminAboutRoute
+  '/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/admin/contact': typeof AuthenticatedAdminContactRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/faqs': typeof AuthenticatedAdminFaqsRoute
   '/admin/hero': typeof AuthenticatedAdminHeroRoute
   '/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/admin/jobs': typeof AuthenticatedAdminJobsRoute
+  '/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
   '/admin/nav': typeof AuthenticatedAdminNavRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
@@ -248,12 +263,14 @@ export interface FileRoutesByTo {
   '/store': typeof StoreRouteWithChildren
   '/store/$slug': typeof StoreSlugRoute
   '/admin/about': typeof AuthenticatedAdminAboutRoute
+  '/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/admin/contact': typeof AuthenticatedAdminContactRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/faqs': typeof AuthenticatedAdminFaqsRoute
   '/admin/hero': typeof AuthenticatedAdminHeroRoute
   '/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/admin/jobs': typeof AuthenticatedAdminJobsRoute
+  '/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
   '/admin/nav': typeof AuthenticatedAdminNavRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
@@ -282,12 +299,14 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/store/$slug': typeof StoreSlugRoute
   '/_authenticated/admin/about': typeof AuthenticatedAdminAboutRoute
+  '/_authenticated/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/_authenticated/admin/contact': typeof AuthenticatedAdminContactRoute
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/_authenticated/admin/faqs': typeof AuthenticatedAdminFaqsRoute
   '/_authenticated/admin/hero': typeof AuthenticatedAdminHeroRoute
   '/_authenticated/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/_authenticated/admin/jobs': typeof AuthenticatedAdminJobsRoute
+  '/_authenticated/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/_authenticated/admin/media': typeof AuthenticatedAdminMediaRoute
   '/_authenticated/admin/nav': typeof AuthenticatedAdminNavRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
@@ -316,12 +335,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/store/$slug'
     | '/admin/about'
+    | '/admin/backup'
     | '/admin/contact'
     | '/admin/doctors'
     | '/admin/faqs'
     | '/admin/hero'
     | '/admin/homepage'
     | '/admin/jobs'
+    | '/admin/logs'
     | '/admin/media'
     | '/admin/nav'
     | '/admin/products'
@@ -347,12 +368,14 @@ export interface FileRouteTypes {
     | '/store'
     | '/store/$slug'
     | '/admin/about'
+    | '/admin/backup'
     | '/admin/contact'
     | '/admin/doctors'
     | '/admin/faqs'
     | '/admin/hero'
     | '/admin/homepage'
     | '/admin/jobs'
+    | '/admin/logs'
     | '/admin/media'
     | '/admin/nav'
     | '/admin/products'
@@ -380,12 +403,14 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/store/$slug'
     | '/_authenticated/admin/about'
+    | '/_authenticated/admin/backup'
     | '/_authenticated/admin/contact'
     | '/_authenticated/admin/doctors'
     | '/_authenticated/admin/faqs'
     | '/_authenticated/admin/hero'
     | '/_authenticated/admin/homepage'
     | '/_authenticated/admin/jobs'
+    | '/_authenticated/admin/logs'
     | '/_authenticated/admin/media'
     | '/_authenticated/admin/nav'
     | '/_authenticated/admin/products'
@@ -583,6 +608,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMediaRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/logs': {
+      id: '/_authenticated/admin/logs'
+      path: '/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AuthenticatedAdminLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/jobs': {
       id: '/_authenticated/admin/jobs'
       path: '/jobs'
@@ -625,6 +657,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminContactRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/backup': {
+      id: '/_authenticated/admin/backup'
+      path: '/backup'
+      fullPath: '/admin/backup'
+      preLoaderRoute: typeof AuthenticatedAdminBackupRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/about': {
       id: '/_authenticated/admin/about'
       path: '/about'
@@ -637,12 +676,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAboutRoute: typeof AuthenticatedAdminAboutRoute
+  AuthenticatedAdminBackupRoute: typeof AuthenticatedAdminBackupRoute
   AuthenticatedAdminContactRoute: typeof AuthenticatedAdminContactRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
   AuthenticatedAdminFaqsRoute: typeof AuthenticatedAdminFaqsRoute
   AuthenticatedAdminHeroRoute: typeof AuthenticatedAdminHeroRoute
   AuthenticatedAdminHomepageRoute: typeof AuthenticatedAdminHomepageRoute
   AuthenticatedAdminJobsRoute: typeof AuthenticatedAdminJobsRoute
+  AuthenticatedAdminLogsRoute: typeof AuthenticatedAdminLogsRoute
   AuthenticatedAdminMediaRoute: typeof AuthenticatedAdminMediaRoute
   AuthenticatedAdminNavRoute: typeof AuthenticatedAdminNavRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
@@ -659,12 +700,14 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAboutRoute: AuthenticatedAdminAboutRoute,
+  AuthenticatedAdminBackupRoute: AuthenticatedAdminBackupRoute,
   AuthenticatedAdminContactRoute: AuthenticatedAdminContactRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
   AuthenticatedAdminFaqsRoute: AuthenticatedAdminFaqsRoute,
   AuthenticatedAdminHeroRoute: AuthenticatedAdminHeroRoute,
   AuthenticatedAdminHomepageRoute: AuthenticatedAdminHomepageRoute,
   AuthenticatedAdminJobsRoute: AuthenticatedAdminJobsRoute,
+  AuthenticatedAdminLogsRoute: AuthenticatedAdminLogsRoute,
   AuthenticatedAdminMediaRoute: AuthenticatedAdminMediaRoute,
   AuthenticatedAdminNavRoute: AuthenticatedAdminNavRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
