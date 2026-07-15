@@ -109,7 +109,7 @@ const TestSchema = z.object({
   id: z.string().uuid().optional(),
   author: z.string().min(1),
   role: z.string().nullable().optional(),
-  quote: z.string().min(1),
+  quote: z.string().nullable().optional(),
   rating: z.number().int().min(1).max(5).default(5),
   photo_url: z.string().nullable().optional(),
   sort_order: z.number().int().default(0),
