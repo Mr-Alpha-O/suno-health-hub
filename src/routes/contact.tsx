@@ -18,7 +18,7 @@ export const Route = createFileRoute("/contact")({
       { property: "og:title", content: "تواصل معنا | سونو" },
       { property: "og:description", content: "نحن في خدمتك على مدار الساعة." },
     ],
-    links: [{ rel: "canonical", href: "/contact" }],
+    links: [{ rel: "canonical", href: "https://www.swnwmedicalcare.com/contact" }],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(contactQO),
   component: ContactPage,

@@ -17,7 +17,7 @@ export const Route = createFileRoute("/careers")({
       { property: "og:title", content: "الوظائف | سونو للخدمات الطبية" },
       { property: "og:description", content: "تقدّم لشغل وظائف طبية في فريقنا." },
     ],
-    links: [{ rel: "canonical", href: "/careers" }],
+    links: [{ rel: "canonical", href: "https://www.swnwmedicalcare.com/careers" }],
   }),
   loader: async ({ context }) => {
     await Promise.all([

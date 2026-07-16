@@ -14,7 +14,7 @@ export const Route = createFileRoute("/about")({
       { property: "og:title", content: "من نحن | سونو للخدمات الطبية" },
       { property: "og:description", content: "رؤيتنا ورسالتنا في تقديم رعاية صحية منزلية احترافية." },
     ],
-    links: [{ rel: "canonical", href: "/about" }],
+    links: [{ rel: "canonical", href: "https://www.swnwmedicalcare.com/about" }],
   }),
   loader: async ({ context }) => {
     await Promise.all([

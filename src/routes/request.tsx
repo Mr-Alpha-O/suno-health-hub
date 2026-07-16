@@ -18,7 +18,7 @@ export const Route = createFileRoute("/request")({
       { property: "og:title", content: "اطلب خدمة | سونو" },
       { property: "og:description", content: "خدمة طبية منزلية بطلب واحد." },
     ],
-    links: [{ rel: "canonical", href: "/request" }],
+    links: [{ rel: "canonical", href: "https://www.swnwmedicalcare.com/request" }],
   }),
   validateSearch: (s: Record<string, unknown>) => ({ service: typeof s.service === "string" ? s.service : "" }),
   loader: async ({ context }) => {

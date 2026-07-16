@@ -12,7 +12,7 @@ export const Route = createFileRoute("/services")({
       { property: "og:title", content: "خدماتنا | سونو للخدمات الطبية" },
       { property: "og:description", content: "خدمات طبية متكاملة لمنزلك وعائلتك." },
     ],
-    links: [{ rel: "canonical", href: "/services" }],
+    links: [{ rel: "canonical", href: "https://www.swnwmedicalcare.com/services" }],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(serviceCategoriesQO),
   component: ServicesPage,
