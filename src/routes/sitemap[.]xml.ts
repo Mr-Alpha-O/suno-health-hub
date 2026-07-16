@@ -5,6 +5,8 @@ import type { Database } from "@/integrations/supabase/types";
 
 const BASE_URL = "https://www.swnwmedicalcare.com";
 
+const toAbsoluteUrl = (path: string) => new URL(path, BASE_URL).toString();
+
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
@@ -29,7 +31,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           ...(products ?? []).map((p) => ({ path: `/store/${p.slug}`, changefreq: "monthly", priority: "0.7" })),
           ...(cats ?? []).map(() => null).filter(Boolean) as never[],
         ];
-        const urls = entries.map((e) => `  <url>\n    <loc>${BASE_URL}${e.path}</loc>\n    <changefreq>${e.changefreq}</changefreq>\n    <priority>${e.priority}</priority>\n  </url>`).join("\n");
+        const urls = entries.map((e) => `  <url>\n    <loc>${toAbsoluteUrl(e.path)}</loc>\n    <changefreq>${e.changefreq}</changefreq>\n    <priority>${e.priority}</priority>\n  </url>`).join("\n");
         const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`;
         return new Response(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=3600" } });
       },
