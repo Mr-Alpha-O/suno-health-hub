@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "سونو للخدمات الطبية | رعاية صحية منزلية متكاملة 24 ساعة" },
       { property: "og:description", content: "احجز رعاية تمريضية منزلية، أطباء زيارات، تحاليل وأشعة، إسعاف وتأجير أجهزة طبية مع شركة سونو للخدمات الطبية." },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://www.swnwmedicalcare.com/" }],
   }),
   loader: async ({ context }) => {
     await Promise.all([

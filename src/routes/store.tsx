@@ -15,7 +15,7 @@ export const Route = createFileRoute("/store")({
       { property: "og:title", content: "المتجر الطبي | سونو للخدمات الطبية" },
       { property: "og:description", content: "أجهزة طبية للبيع والإيجار بأسعار شفافة وضمان." },
     ],
-    links: [{ rel: "canonical", href: "/store" }],
+    links: [{ rel: "canonical", href: "https://www.swnwmedicalcare.com/store" }],
   }),
   loader: async ({ context }) => {
     await Promise.all([
