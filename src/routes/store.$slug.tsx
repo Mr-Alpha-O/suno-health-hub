@@ -15,7 +15,7 @@ export const Route = createFileRoute("/store/$slug")({
       { property: "og:description", content: "منتج طبي من سونو." },
       { property: "og:type", content: "product" },
     ],
-    links: [{ rel: "canonical", href: `/store/${params.slug}` }],
+    links: [{ rel: "canonical", href: `https://www.swnwmedicalcare.com/store/${params.slug}` }],
   }),
   loader: async ({ params, context }) => {
     const data = await context.queryClient.ensureQueryData(productBySlugQO(params.slug));
