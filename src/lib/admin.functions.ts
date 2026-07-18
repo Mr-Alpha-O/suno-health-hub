@@ -141,6 +141,11 @@ const ProductSchema = z.object({
   is_featured: z.boolean().default(false),
   is_visible: z.boolean().default(true),
   sort_order: z.number().int().default(0),
+  rental_unit: z.enum(["hour","day","week","month","year","negotiable"]).default("day"),
+  show_buy_price: z.boolean().default(true),
+  show_rent_price: z.boolean().default(true),
+  available_for_sale: z.boolean().default(true),
+  available_for_rent: z.boolean().default(true),
 });
 
 function slugifyName(name: string): string {
