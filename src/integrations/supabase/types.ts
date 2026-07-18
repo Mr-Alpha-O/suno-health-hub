@@ -636,6 +636,8 @@ export type Database = {
       }
       products: {
         Row: {
+          available_for_rent: boolean
+          available_for_sale: boolean
           buy_price: number | null
           category: string | null
           created_at: string
@@ -648,13 +650,18 @@ export type Database = {
           name: string
           old_price: number | null
           rent_price: number | null
+          rental_unit: string
           short: string | null
+          show_buy_price: boolean
+          show_rent_price: boolean
           slug: string | null
           sort_order: number
           stock: number | null
           updated_at: string
         }
         Insert: {
+          available_for_rent?: boolean
+          available_for_sale?: boolean
           buy_price?: number | null
           category?: string | null
           created_at?: string
@@ -667,13 +674,18 @@ export type Database = {
           name: string
           old_price?: number | null
           rent_price?: number | null
+          rental_unit?: string
           short?: string | null
+          show_buy_price?: boolean
+          show_rent_price?: boolean
           slug?: string | null
           sort_order?: number
           stock?: number | null
           updated_at?: string
         }
         Update: {
+          available_for_rent?: boolean
+          available_for_sale?: boolean
           buy_price?: number | null
           category?: string | null
           created_at?: string
@@ -686,7 +698,10 @@ export type Database = {
           name?: string
           old_price?: number | null
           rent_price?: number | null
+          rental_unit?: string
           short?: string | null
+          show_buy_price?: boolean
+          show_rent_price?: boolean
           slug?: string | null
           sort_order?: number
           stock?: number | null
