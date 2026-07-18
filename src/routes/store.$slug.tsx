@@ -37,6 +37,8 @@ export const Route = createFileRoute("/store/$slug")({
   ),
 });
 
+const unitLabel: Record<string, string> = { hour: "ساعة", day: "يوم", week: "أسبوع", month: "شهر", year: "سنة", negotiable: "" };
+
 function ProductPage() {
   const { slug } = Route.useParams();
   const { data: p } = useSuspenseQuery(productBySlugQO(slug));
@@ -60,8 +62,7 @@ function ProductPage() {
   const showRent = (p as any).show_rent_price !== false && rent != null && rent > 0;
   const forSale = (p as any).available_for_sale !== false;
   const forRent = (p as any).available_for_rent !== false;
-  const unitLabel: Record<string, string> = { hour: "ساعة", day: "يوم", week: "أسبوع", month: "شهر", year: "سنة", negotiable: "حسب الاتفاق" };
-  const rentSuffix = rentalUnit === "negotiable" ? "" : ` / ${unitLabel[rentalUnit] ?? "يوم"}`;
+  const rentSuffix = rentalUnit === "negotiable" || !unitLabel[rentalUnit] ? "" : ` / ${unitLabel[rentalUnit]}`;
   const isFav = fav.has(p.id as string);
 
   const productUrl = `https://www.swnwmedicalcare.com/store/${p.slug}`;
@@ -91,12 +92,15 @@ function ProductPage() {
   };
   const shareWa = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${productUrl}`)}`;
 
-  // Related: same category first, then others, exclude current, max 4
   const others = allProducts.filter((x) => x.id !== p.id);
   const related = [
     ...others.filter((x) => x.category && x.category === p.category),
     ...others.filter((x) => !x.category || x.category !== p.category),
   ].slice(0, 4);
+
+  const saleOnly = forSale && !forRent;
+  const rentOnly = forRent && !forSale;
+  const isNegotiable = rentalUnit === "negotiable";
 
   return (
     <section className="container mx-auto px-4 py-12">
@@ -108,14 +112,25 @@ function ProductPage() {
           <button
             onClick={() => setLightbox(true)}
             aria-label="عرض الصورة بحجم أكبر"
-            className="w-full rounded-3xl overflow-hidden bg-secondary/30 border border-border shadow-elegant aspect-square flex items-center justify-center cursor-zoom-in"
+            className="group w-full rounded-3xl overflow-hidden bg-secondary/30 border border-border shadow-elegant aspect-square flex items-center justify-center cursor-zoom-in"
           >
-            <img src={gallery[active] ?? mainImg} alt={p.name} width={800} height={800} className="w-full h-full object-contain" />
+            <img
+              src={gallery[active] ?? mainImg}
+              alt={p.name}
+              width={800}
+              height={800}
+              className="w-full h-full object-contain transition-transform duration-500 md:group-hover:scale-110"
+            />
           </button>
           {gallery.length > 1 && (
             <div className="mt-3 grid grid-cols-5 gap-2">
               {gallery.map((g, i) => (
-                <button key={g + i} onClick={() => setActive(i)} className={`rounded-lg overflow-hidden aspect-square border-2 bg-secondary/30 flex items-center justify-center ${active === i ? "border-primary" : "border-transparent"}`}>
+                <button
+                  key={g + i}
+                  onClick={() => setActive(i)}
+                  aria-label={`صورة ${i + 1}`}
+                  className={`rounded-lg overflow-hidden aspect-square border-2 bg-secondary/30 flex items-center justify-center transition-smooth ${active === i ? "border-primary shadow-soft" : "border-transparent hover:border-primary/40"}`}
+                >
                   <img src={g} alt="" loading="lazy" className="w-full h-full object-contain" />
                 </button>
               ))}
@@ -125,8 +140,15 @@ function ProductPage() {
         <div>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-sm text-primary font-bold">{p.category}</div>
+              {p.category && <div className="text-sm text-primary font-bold">{p.category}</div>}
               <h1 className="mt-2 text-3xl md:text-4xl font-extrabold">{p.name}</h1>
+              {(saleOnly || rentOnly || isNegotiable) && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {saleOnly && <StatusBadge tone="emerald">للبيع فقط</StatusBadge>}
+                  {rentOnly && <StatusBadge tone="sky">للإيجار فقط</StatusBadge>}
+                  {isNegotiable && <StatusBadge tone="amber">قابل للتفاوض</StatusBadge>}
+                </div>
+              )}
             </div>
             <button
               onClick={() => fav.toggle(p.id as string)}
@@ -138,34 +160,44 @@ function ProductPage() {
           </div>
           {p.short && <p className="mt-4 text-muted-foreground leading-8">{p.short}</p>}
 
-          {(showBuy || showRent) && (
-            <div className={`mt-6 grid gap-4 ${showBuy && showRent ? "grid-cols-2" : "grid-cols-1"}`}>
-              {showBuy && (
-                <div className="bg-gradient-card rounded-2xl p-5 border border-border">
-                  <div className="text-xs text-muted-foreground">سعر الشراء</div>
-                  <div className="mt-1 text-2xl font-extrabold text-primary">{buy!.toLocaleString("ar-EG")} ج.م</div>
-                </div>
+          {(forSale || forRent) && (
+            <div className={`mt-6 grid gap-3 ${forSale && forRent ? "sm:grid-cols-2" : "grid-cols-1"}`}>
+              {forSale && (
+                <a
+                  href={waLinkFor(whatsapp, `أرغب في شراء: ${p.name}\n${productUrl}`)}
+                  target="_blank"
+                  rel="noopener"
+                  className="group flex flex-col items-center justify-center gap-1 bg-gradient-hero text-primary-foreground rounded-2xl px-5 py-4 font-bold shadow-soft hover:shadow-elegant transition-smooth"
+                >
+                  <span className="inline-flex items-center gap-2 text-base">
+                    <ShoppingCart className="h-5 w-5" /> شراء
+                  </span>
+                  {showBuy && (
+                    <span className="text-xl font-extrabold tracking-tight">{buy!.toLocaleString("ar-EG")} ج.م</span>
+                  )}
+                </a>
               )}
-              {showRent && (
-                <div className="bg-gradient-card rounded-2xl p-5 border border-border">
-                  <div className="text-xs text-muted-foreground">سعر الإيجار{rentSuffix}</div>
-                  <div className="mt-1 text-2xl font-extrabold text-primary">{rent!.toLocaleString("ar-EG")} ج.م</div>
-                </div>
+              {forRent && (
+                <a
+                  href={waLinkFor(whatsapp, `أرغب في إيجار: ${p.name}\n${productUrl}`)}
+                  target="_blank"
+                  rel="noopener"
+                  className="group flex flex-col items-center justify-center gap-1 bg-white text-primary border border-primary/30 rounded-2xl px-5 py-4 font-bold hover:bg-secondary hover:shadow-soft transition-smooth"
+                >
+                  <span className="inline-flex items-center gap-2 text-base">
+                    <Repeat className="h-5 w-5" /> إيجار
+                  </span>
+                  {showRent && (
+                    <span className="text-xl font-extrabold tracking-tight">
+                      {rent!.toLocaleString("ar-EG")} ج.م<span className="text-xs font-bold text-muted-foreground">{rentSuffix}</span>
+                    </span>
+                  )}
+                </a>
               )}
             </div>
           )}
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            {forSale && (
-              <a href={waLinkFor(whatsapp, `أرغب في شراء: ${p.name}\n${productUrl}`)} target="_blank" rel="noopener" className="inline-flex items-center gap-2 bg-gradient-hero text-primary-foreground px-5 py-3 rounded-xl font-bold shadow-soft hover:shadow-elegant transition-smooth">
-                <ShoppingCart className="h-4 w-4" /> اشترِ الآن
-              </a>
-            )}
-            {forRent && (
-              <a href={waLinkFor(whatsapp, `أرغب في إيجار: ${p.name}\n${productUrl}`)} target="_blank" rel="noopener" className="inline-flex items-center gap-2 bg-white text-primary border border-primary/30 px-5 py-3 rounded-xl font-bold hover:bg-secondary transition-smooth">
-                <Repeat className="h-4 w-4" /> استأجر
-              </a>
-            )}
+          <div className="mt-4 flex flex-wrap gap-3">
             <a href={waLinkFor(whatsapp, enquiryMsg)} target="_blank" rel="noopener" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-primary hover:bg-secondary transition-smooth border border-transparent hover:border-primary/20">
               <MessageCircle className="h-4 w-4" /> واتساب
             </a>
@@ -218,7 +250,7 @@ function ProductPage() {
                     <img src={rImg} alt={r.name} loading="lazy" className="w-full h-full object-contain group-hover:scale-105 transition-smooth" />
                   </div>
                   <div className="p-4">
-                    <div className="text-xs text-primary font-bold mb-1">{r.category}</div>
+                    {r.category && <div className="text-xs text-primary font-bold mb-1">{r.category}</div>}
                     <div className="font-extrabold text-base line-clamp-1">{r.name}</div>
                     {(rShowBuy || rShowRent) && (
                       <div className="mt-2 text-xs text-primary font-bold">
@@ -239,5 +271,24 @@ function ProductPage() {
         <Lightbox images={gallery} startIndex={active} onClose={() => setLightbox(false)} alt={p.name} />
       )}
     </section>
+  );
+}
+
+function StatusBadge({ tone, children }: { tone: "emerald" | "sky" | "amber"; children: React.ReactNode }) {
+  const styles: Record<string, string> = {
+    emerald: "bg-emerald-100 text-emerald-800 ring-emerald-200",
+    sky: "bg-sky-100 text-sky-800 ring-sky-200",
+    amber: "bg-amber-100 text-amber-800 ring-amber-200",
+  };
+  const dot: Record<string, string> = {
+    emerald: "bg-emerald-500",
+    sky: "bg-sky-500",
+    amber: "bg-amber-500",
+  };
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold ring-1 ${styles[tone]}`}>
+      <span className={`h-2 w-2 rounded-full ${dot[tone]}`} />
+      {children}
+    </span>
   );
 }
