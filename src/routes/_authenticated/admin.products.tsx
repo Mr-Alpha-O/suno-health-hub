@@ -100,9 +100,26 @@ function ProductRow({ product, onSave, onRemove }: any) {
         <input type="number" step="0.01" value={p.old_price ?? ""} onChange={(e) => setP({ ...p, old_price: e.target.value })} placeholder="السعر القديم" className="rounded-md border px-3 py-2 text-sm" />
         <input type="number" value={p.stock ?? ""} onChange={(e) => setP({ ...p, stock: e.target.value })} placeholder="المخزون" className="rounded-md border px-3 py-2 text-sm" />
       </div>
+      <div className="grid md:grid-cols-2 gap-2">
+        <label className="flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground min-w-[110px]">وحدة الإيجار</span>
+          <select value={p.rental_unit ?? "day"} onChange={(e) => setP({ ...p, rental_unit: e.target.value })} className="rounded-md border px-2 py-1.5 text-sm flex-1">
+            <option value="hour">ساعة</option>
+            <option value="day">يوم</option>
+            <option value="week">أسبوع</option>
+            <option value="month">شهر</option>
+            <option value="year">سنة</option>
+            <option value="negotiable">حسب الاتفاق</option>
+          </select>
+        </label>
+      </div>
       <textarea value={p.details ?? ""} onChange={(e) => setP({ ...p, details: e.target.value })} placeholder="مواصفات (سطر لكل ميزة)" rows={3} className="w-full rounded-md border px-3 py-2 text-sm" />
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <label className="flex items-center gap-1"><input type="checkbox" checked={!!p.is_available} onChange={(e) => setP({ ...p, is_available: e.target.checked })} /> متاح (غير نافد)</label>
+        <label className="flex items-center gap-1"><input type="checkbox" checked={p.show_buy_price !== false} onChange={(e) => setP({ ...p, show_buy_price: e.target.checked })} /> إظهار سعر البيع</label>
+        <label className="flex items-center gap-1"><input type="checkbox" checked={p.show_rent_price !== false} onChange={(e) => setP({ ...p, show_rent_price: e.target.checked })} /> إظهار سعر الإيجار</label>
+        <label className="flex items-center gap-1"><input type="checkbox" checked={p.available_for_sale !== false} onChange={(e) => setP({ ...p, available_for_sale: e.target.checked })} /> متاح للبيع</label>
+        <label className="flex items-center gap-1"><input type="checkbox" checked={p.available_for_rent !== false} onChange={(e) => setP({ ...p, available_for_rent: e.target.checked })} /> متاح للإيجار</label>
+        <label className="flex items-center gap-1"><input type="checkbox" checked={!!p.is_available} onChange={(e) => setP({ ...p, is_available: e.target.checked })} /> غير نافد</label>
         <label className="flex items-center gap-1"><input type="checkbox" checked={!!p.is_featured} onChange={(e) => setP({ ...p, is_featured: e.target.checked })} /> مميز</label>
         <label className="flex items-center gap-1"><input type="checkbox" checked={!!p.is_visible} onChange={(e) => setP({ ...p, is_visible: e.target.checked })} /> ظاهر</label>
         <input type="number" value={p.sort_order ?? 0} onChange={(e) => setP({ ...p, sort_order: e.target.value })} placeholder="ترتيب" className="rounded-md border px-2 py-1 text-sm w-24" />
