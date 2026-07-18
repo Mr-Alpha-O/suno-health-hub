@@ -38,6 +38,11 @@ function ProductsPage() {
         stock: p.stock === "" || p.stock == null ? null : Number(p.stock),
         is_available: !!p.is_available, is_featured: !!p.is_featured, is_visible: !!p.is_visible,
         sort_order: Number(p.sort_order) || 0,
+        rental_unit: p.rental_unit || "day",
+        show_buy_price: p.show_buy_price !== false,
+        show_rent_price: p.show_rent_price !== false,
+        available_for_sale: p.available_for_sale !== false,
+        available_for_rent: p.available_for_rent !== false,
       }});
       toast.success("تم الحفظ"); load();
     } catch (e: any) { toast.error(e.message); }
