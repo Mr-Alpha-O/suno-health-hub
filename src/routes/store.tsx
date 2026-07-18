@@ -250,3 +250,18 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
     </button>
   );
 }
+
+function CardBadge({ tone, children }: { tone: "emerald" | "sky" | "amber"; children: React.ReactNode }) {
+  const styles: Record<string, string> = {
+    emerald: "bg-emerald-100 text-emerald-800 ring-emerald-200",
+    sky: "bg-sky-100 text-sky-800 ring-sky-200",
+    amber: "bg-amber-100 text-amber-800 ring-amber-200",
+  };
+  const dot: Record<string, string> = { emerald: "bg-emerald-500", sky: "bg-sky-500", amber: "bg-amber-500" };
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ${styles[tone]}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${dot[tone]}`} />
+      {children}
+    </span>
+  );
+}
