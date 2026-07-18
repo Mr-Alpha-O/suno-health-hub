@@ -177,50 +177,54 @@ function StorePage() {
             const forSale = (p as any).available_for_sale !== false;
             const forRent = (p as any).available_for_rent !== false;
             const unitLabel: Record<string, string> = { hour: "ساعة", day: "يوم", week: "أسبوع", month: "شهر", year: "سنة", negotiable: "" };
-            const rentSuffix = rentalUnit === "negotiable" ? "" : `/${unitLabel[rentalUnit] ?? "يوم"}`;
+            const rentSuffix = rentalUnit === "negotiable" || !unitLabel[rentalUnit] ? "" : ` / ${unitLabel[rentalUnit]}`;
             const isFav = fav.has(p.id as string);
+            const saleOnly = forSale && !forRent;
+            const rentOnly = forRent && !forSale;
+            const isNegotiable = rentalUnit === "negotiable";
             return (
-              <div key={p.id ?? slug} className="group bg-white rounded-2xl border border-border shadow-soft hover:shadow-elegant overflow-hidden transition-smooth hover:-translate-y-1 relative">
+              <div key={p.id ?? slug} className="group bg-white rounded-2xl border border-border shadow-soft hover:shadow-elegant overflow-hidden transition-smooth hover:-translate-y-1 relative flex flex-col">
                 <button
                   onClick={(e) => { e.preventDefault(); fav.toggle(p.id as string); }}
                   aria-label={isFav ? "إزالة من المفضلة" : "أضف للمفضلة"}
                   className={`absolute top-2 left-2 z-10 h-9 w-9 rounded-full flex items-center justify-center backdrop-blur bg-white/80 hover:bg-white shadow-soft transition-smooth ${isFav ? "text-red-500" : "text-muted-foreground hover:text-red-500"}`}
                 >
-                  <Heart className={`h-4.5 w-4.5 ${isFav ? "fill-current" : ""}`} />
+                  <Heart className={`h-4 w-4 ${isFav ? "fill-current" : ""}`} />
                 </button>
                 <Link to="/store/$slug" params={{ slug }} className="block aspect-square overflow-hidden bg-secondary/30 flex items-center justify-center">
                   <img src={img} alt={p.name} width={800} height={800} loading="lazy" className="w-full h-full object-contain group-hover:scale-105 transition-smooth" />
                 </Link>
-                <div className="p-5">
-                  <div className="text-xs text-primary font-bold mb-1">{p.category}</div>
+                <div className="p-5 flex flex-col flex-1">
+                  {p.category && <div className="text-xs text-primary font-bold mb-1">{p.category}</div>}
                   <Link to="/store/$slug" params={{ slug: p.slug }} className="font-extrabold text-lg hover:text-primary transition-smooth line-clamp-1">{p.name}</Link>
-                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-6">{p.short}</p>
-                  {(showBuy || showRent) && (
-                    <div className={`mt-4 grid gap-2 text-center ${showBuy && showRent ? "grid-cols-2" : "grid-cols-1"}`}>
-                      {showBuy && (
-                        <div className="bg-secondary/60 rounded-lg py-2">
-                          <div className="text-[10px] text-muted-foreground">سعر الشراء</div>
-                          <div className="font-extrabold text-primary text-sm">{buy!.toLocaleString("ar-EG")} ج.م</div>
-                        </div>
-                      )}
-                      {showRent && (
-                        <div className="bg-secondary/60 rounded-lg py-2">
-                          <div className="text-[10px] text-muted-foreground">سعر الإيجار{rentSuffix}</div>
-                          <div className="font-extrabold text-primary text-sm">{rent!.toLocaleString("ar-EG")} ج.م</div>
-                        </div>
-                      )}
+                  {p.short && <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-6">{p.short}</p>}
+                  {(saleOnly || rentOnly || isNegotiable) && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {saleOnly && <CardBadge tone="emerald">للبيع فقط</CardBadge>}
+                      {rentOnly && <CardBadge tone="sky">للإيجار فقط</CardBadge>}
+                      {isNegotiable && <CardBadge tone="amber">قابل للتفاوض</CardBadge>}
                     </div>
                   )}
                   {(forSale || forRent) && (
-                    <div className={`mt-4 grid gap-2 ${forSale && forRent ? "grid-cols-2" : "grid-cols-1"}`}>
+                    <div className={`mt-auto pt-4 grid gap-2 ${forSale && forRent ? "grid-cols-2" : "grid-cols-1"}`}>
                       {forSale && (
-                        <a href={waLinkFor(whatsapp, `أرغب في شراء: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center justify-center gap-1.5 bg-gradient-hero text-primary-foreground py-2 rounded-lg text-xs font-bold hover:shadow-elegant transition-smooth">
-                          <ShoppingCart className="h-3.5 w-3.5" /> شراء
+                        <a href={waLinkFor(whatsapp, `أرغب في شراء: ${p.name}`)} target="_blank" rel="noopener" className="flex flex-col items-center justify-center gap-0.5 bg-gradient-hero text-primary-foreground py-2.5 px-2 rounded-xl font-bold hover:shadow-elegant transition-smooth">
+                          <span className="inline-flex items-center gap-1.5 text-xs">
+                            <ShoppingCart className="h-3.5 w-3.5" /> شراء
+                          </span>
+                          {showBuy && <span className="text-sm font-extrabold">{buy!.toLocaleString("ar-EG")} ج.م</span>}
                         </a>
                       )}
                       {forRent && (
-                        <a href={waLinkFor(whatsapp, `أرغب في إيجار: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center justify-center gap-1.5 bg-white text-primary border border-primary/30 py-2 rounded-lg text-xs font-bold hover:bg-secondary transition-smooth">
-                          <Repeat className="h-3.5 w-3.5" /> إيجار
+                        <a href={waLinkFor(whatsapp, `أرغب في إيجار: ${p.name}`)} target="_blank" rel="noopener" className="flex flex-col items-center justify-center gap-0.5 bg-white text-primary border border-primary/30 py-2.5 px-2 rounded-xl font-bold hover:bg-secondary transition-smooth">
+                          <span className="inline-flex items-center gap-1.5 text-xs">
+                            <Repeat className="h-3.5 w-3.5" /> إيجار
+                          </span>
+                          {showRent && (
+                            <span className="text-sm font-extrabold whitespace-nowrap">
+                              {rent!.toLocaleString("ar-EG")} ج.م<span className="text-[10px] text-muted-foreground">{rentSuffix}</span>
+                            </span>
+                          )}
                         </a>
                       )}
                     </div>
