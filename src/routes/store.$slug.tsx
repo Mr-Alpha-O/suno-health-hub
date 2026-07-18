@@ -41,9 +41,16 @@ function ProductPage() {
   const mainImg = productImage(p.slug ?? "", p.image);
   const gallery = [mainImg, ...((p as any).images ?? []).map((i: any) => i.url as string)].filter(Boolean);
   const [active, setActive] = useState(0);
-  const buy = Number(p.buy_price ?? 0);
-  const rent = Number(p.rent_price ?? 0);
+  const buy = p.buy_price == null ? null : Number(p.buy_price);
+  const rent = p.rent_price == null ? null : Number(p.rent_price);
   const details = Array.isArray(p.details) ? (p.details as string[]) : [];
+  const rentalUnit = ((p as any).rental_unit as string) ?? "day";
+  const showBuy = (p as any).show_buy_price !== false && buy != null && buy > 0;
+  const showRent = (p as any).show_rent_price !== false && rent != null && rent > 0;
+  const forSale = (p as any).available_for_sale !== false;
+  const forRent = (p as any).available_for_rent !== false;
+  const unitLabel: Record<string, string> = { hour: "ساعة", day: "يوم", week: "أسبوع", month: "شهر", year: "سنة", negotiable: "حسب الاتفاق" };
+  const rentSuffix = rentalUnit === "negotiable" ? "" : ` / ${unitLabel[rentalUnit] ?? "يوم"}`;
 
   return (
     <section className="container mx-auto px-4 py-12">
@@ -52,14 +59,14 @@ function ProductPage() {
       </Link>
       <div className="grid lg:grid-cols-2 gap-10">
         <div>
-          <div className="rounded-3xl overflow-hidden bg-secondary/30 border border-border shadow-elegant aspect-square">
-            <img src={gallery[active] ?? mainImg} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
+          <div className="rounded-3xl overflow-hidden bg-secondary/30 border border-border shadow-elegant aspect-square flex items-center justify-center">
+            <img src={gallery[active] ?? mainImg} alt={p.name} width={800} height={800} className="w-full h-full object-contain" />
           </div>
           {gallery.length > 1 && (
             <div className="mt-3 grid grid-cols-5 gap-2">
               {gallery.map((g, i) => (
-                <button key={g + i} onClick={() => setActive(i)} className={`rounded-lg overflow-hidden aspect-square border-2 ${active === i ? "border-primary" : "border-transparent"}`}>
-                  <img src={g} alt="" loading="lazy" className="w-full h-full object-cover" />
+                <button key={g + i} onClick={() => setActive(i)} className={`rounded-lg overflow-hidden aspect-square border-2 bg-secondary/30 flex items-center justify-center ${active === i ? "border-primary" : "border-transparent"}`}>
+                  <img src={g} alt="" loading="lazy" className="w-full h-full object-contain" />
                 </button>
               ))}
             </div>
@@ -70,24 +77,34 @@ function ProductPage() {
           <h1 className="mt-2 text-3xl md:text-4xl font-extrabold">{p.name}</h1>
           <p className="mt-4 text-muted-foreground leading-8">{p.short}</p>
 
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            <div className="bg-gradient-card rounded-2xl p-5 border border-border">
-              <div className="text-xs text-muted-foreground">سعر الشراء</div>
-              <div className="mt-1 text-2xl font-extrabold text-primary">{buy.toLocaleString("ar-EG")} ج.م</div>
+          {(showBuy || showRent) && (
+            <div className={`mt-6 grid gap-4 ${showBuy && showRent ? "grid-cols-2" : "grid-cols-1"}`}>
+              {showBuy && (
+                <div className="bg-gradient-card rounded-2xl p-5 border border-border">
+                  <div className="text-xs text-muted-foreground">سعر الشراء</div>
+                  <div className="mt-1 text-2xl font-extrabold text-primary">{buy!.toLocaleString("ar-EG")} ج.م</div>
+                </div>
+              )}
+              {showRent && (
+                <div className="bg-gradient-card rounded-2xl p-5 border border-border">
+                  <div className="text-xs text-muted-foreground">سعر الإيجار{rentSuffix}</div>
+                  <div className="mt-1 text-2xl font-extrabold text-primary">{rent!.toLocaleString("ar-EG")} ج.م</div>
+                </div>
+              )}
             </div>
-            <div className="bg-gradient-card rounded-2xl p-5 border border-border">
-              <div className="text-xs text-muted-foreground">سعر الإيجار / يوم</div>
-              <div className="mt-1 text-2xl font-extrabold text-primary">{rent.toLocaleString("ar-EG")} ج.م</div>
-            </div>
-          </div>
+          )}
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <a href={waLinkFor(whatsapp, `أرغب في شراء: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center gap-2 bg-gradient-hero text-primary-foreground px-5 py-3 rounded-xl font-bold shadow-soft hover:shadow-elegant transition-smooth">
-              <ShoppingCart className="h-4 w-4" /> اشترِ الآن
-            </a>
-            <a href={waLinkFor(whatsapp, `أرغب في إيجار: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center gap-2 bg-white text-primary border border-primary/30 px-5 py-3 rounded-xl font-bold hover:bg-secondary transition-smooth">
-              <Repeat className="h-4 w-4" /> استأجر
-            </a>
+            {forSale && (
+              <a href={waLinkFor(whatsapp, `أرغب في شراء: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center gap-2 bg-gradient-hero text-primary-foreground px-5 py-3 rounded-xl font-bold shadow-soft hover:shadow-elegant transition-smooth">
+                <ShoppingCart className="h-4 w-4" /> اشترِ الآن
+              </a>
+            )}
+            {forRent && (
+              <a href={waLinkFor(whatsapp, `أرغب في إيجار: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center gap-2 bg-white text-primary border border-primary/30 px-5 py-3 rounded-xl font-bold hover:bg-secondary transition-smooth">
+                <Repeat className="h-4 w-4" /> استأجر
+              </a>
+            )}
             <a href={waLinkFor(whatsapp, `استفسار عن: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-primary hover:bg-secondary transition-smooth">
               <MessageCircle className="h-4 w-4" /> استفسر
             </a>

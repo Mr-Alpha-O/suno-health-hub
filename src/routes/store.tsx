@@ -66,35 +66,54 @@ function StorePage() {
           {list.map((p) => {
             const slug = p.slug ?? "";
             const img = productImage(slug, p.image);
-            const buy = Number(p.buy_price ?? 0);
-            const rent = Number(p.rent_price ?? 0);
+            const buy = p.buy_price == null ? null : Number(p.buy_price);
+            const rent = p.rent_price == null ? null : Number(p.rent_price);
+            const rentalUnit = ((p as any).rental_unit as string) ?? "day";
+            const showBuy = (p as any).show_buy_price !== false && buy != null && buy > 0;
+            const showRent = (p as any).show_rent_price !== false && rent != null && rent > 0;
+            const forSale = (p as any).available_for_sale !== false;
+            const forRent = (p as any).available_for_rent !== false;
+            const unitLabel: Record<string, string> = { hour: "ساعة", day: "يوم", week: "أسبوع", month: "شهر", year: "سنة", negotiable: "" };
+            const rentSuffix = rentalUnit === "negotiable" ? "" : `/${unitLabel[rentalUnit] ?? "يوم"}`;
             return (
               <div key={p.id ?? slug} className="group bg-white rounded-2xl border border-border shadow-soft hover:shadow-elegant overflow-hidden transition-smooth hover:-translate-y-1">
-                <Link to="/store/$slug" params={{ slug }} className="block aspect-square overflow-hidden bg-secondary/30">
-                  <img src={img} alt={p.name} width={800} height={800} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-smooth" />
+                <Link to="/store/$slug" params={{ slug }} className="block aspect-square overflow-hidden bg-secondary/30 flex items-center justify-center">
+                  <img src={img} alt={p.name} width={800} height={800} loading="lazy" className="w-full h-full object-contain group-hover:scale-105 transition-smooth" />
                 </Link>
                 <div className="p-5">
                   <div className="text-xs text-primary font-bold mb-1">{p.category}</div>
                   <Link to="/store/$slug" params={{ slug: p.slug }} className="font-extrabold text-lg hover:text-primary transition-smooth line-clamp-1">{p.name}</Link>
                   <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-6">{p.short}</p>
-                  <div className="mt-4 grid grid-cols-2 gap-2 text-center">
-                    <div className="bg-secondary/60 rounded-lg py-2">
-                      <div className="text-[10px] text-muted-foreground">سعر الشراء</div>
-                      <div className="font-extrabold text-primary text-sm">{buy.toLocaleString("ar-EG")} ج.م</div>
+                  {(showBuy || showRent) && (
+                    <div className={`mt-4 grid gap-2 text-center ${showBuy && showRent ? "grid-cols-2" : "grid-cols-1"}`}>
+                      {showBuy && (
+                        <div className="bg-secondary/60 rounded-lg py-2">
+                          <div className="text-[10px] text-muted-foreground">سعر الشراء</div>
+                          <div className="font-extrabold text-primary text-sm">{buy!.toLocaleString("ar-EG")} ج.م</div>
+                        </div>
+                      )}
+                      {showRent && (
+                        <div className="bg-secondary/60 rounded-lg py-2">
+                          <div className="text-[10px] text-muted-foreground">سعر الإيجار{rentSuffix}</div>
+                          <div className="font-extrabold text-primary text-sm">{rent!.toLocaleString("ar-EG")} ج.م</div>
+                        </div>
+                      )}
                     </div>
-                    <div className="bg-secondary/60 rounded-lg py-2">
-                      <div className="text-[10px] text-muted-foreground">سعر الإيجار/يوم</div>
-                      <div className="font-extrabold text-primary text-sm">{rent.toLocaleString("ar-EG")} ج.م</div>
+                  )}
+                  {(forSale || forRent) && (
+                    <div className={`mt-4 grid gap-2 ${forSale && forRent ? "grid-cols-2" : "grid-cols-1"}`}>
+                      {forSale && (
+                        <a href={waLinkFor(whatsapp, `أرغب في شراء: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center justify-center gap-1.5 bg-gradient-hero text-primary-foreground py-2 rounded-lg text-xs font-bold hover:shadow-elegant transition-smooth">
+                          <ShoppingCart className="h-3.5 w-3.5" /> شراء
+                        </a>
+                      )}
+                      {forRent && (
+                        <a href={waLinkFor(whatsapp, `أرغب في إيجار: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center justify-center gap-1.5 bg-white text-primary border border-primary/30 py-2 rounded-lg text-xs font-bold hover:bg-secondary transition-smooth">
+                          <Repeat className="h-3.5 w-3.5" /> إيجار
+                        </a>
+                      )}
                     </div>
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    <a href={waLinkFor(whatsapp, `أرغب في شراء: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center justify-center gap-1.5 bg-gradient-hero text-primary-foreground py-2 rounded-lg text-xs font-bold hover:shadow-elegant transition-smooth">
-                      <ShoppingCart className="h-3.5 w-3.5" /> شراء
-                    </a>
-                    <a href={waLinkFor(whatsapp, `أرغب في إيجار: ${p.name}`)} target="_blank" rel="noopener" className="inline-flex items-center justify-center gap-1.5 bg-white text-primary border border-primary/30 py-2 rounded-lg text-xs font-bold hover:bg-secondary transition-smooth">
-                      <Repeat className="h-3.5 w-3.5" /> إيجار
-                    </a>
-                  </div>
+                  )}
                 </div>
               </div>
             );
