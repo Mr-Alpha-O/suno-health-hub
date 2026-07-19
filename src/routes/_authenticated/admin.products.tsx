@@ -279,7 +279,7 @@ function ImagesGallery({ productId }: { productId: string }) {
         <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
           {rows.map((r, i) => (
             <div key={r.id} className="relative group border rounded overflow-hidden">
-              <img src={r.url} alt={r.alt ?? ""} className="w-full aspect-square object-cover" />
+              <img src={r._preview ?? r.url} alt={r.alt ?? ""} className="w-full aspect-square object-cover" />
               <div className="absolute inset-x-0 bottom-0 flex justify-between p-1 bg-black/50 opacity-0 group-hover:opacity-100 transition">
                 <button onClick={() => move(i, -1)} className="text-white p-0.5"><ArrowUp className="h-3 w-3" /></button>
                 <button onClick={() => move(i, 1)} className="text-white p-0.5"><ArrowDown className="h-3 w-3" /></button>
