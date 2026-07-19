@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { extractMediaPath, isHttpUrl } from "@/lib/media-url";
 
 function anonClient() {
   return createClient<Database>(
@@ -12,6 +13,34 @@ function anonClient() {
 }
 
 const phoneRe = /^[0-9+\s\-()]{6,30}$/;
+
+// URL signer: converts an array of stored values (paths or full URLs) into displayable URLs.
+// Batches all storage-bucket paths into a single createSignedUrls call for performance.
+async function signMediaValues(sb: ReturnType<typeof anonClient>, values: Array<string | null | undefined>): Promise<Record<string, string>> {
+  const paths = new Set<string>();
+  for (const v of values) {
+    if (!v) continue;
+    if (isHttpUrl(v)) continue;
+    const p = extractMediaPath(v);
+    if (p) paths.add(p);
+  }
+  const map: Record<string, string> = {};
+  if (paths.size === 0) return map;
+  const arr = Array.from(paths);
+  const { data } = await sb.storage.from("media").createSignedUrls(arr, 60 * 60 * 24 * 7);
+  for (const row of data ?? []) {
+    if (row.path && row.signedUrl) map[row.path] = row.signedUrl;
+  }
+  return map;
+}
+
+function resolveOne(v: string | null | undefined, map: Record<string, string>): string | null {
+  if (!v) return null;
+  if (isHttpUrl(v)) return v;
+  const p = extractMediaPath(v);
+  if (p && map[p]) return map[p];
+  return v ?? null;
+}
 
 // ============ READ FUNCTIONS ============
 
@@ -42,18 +71,45 @@ export const getServiceCategoriesPublic = createServerFn({ method: "GET" }).hand
 
 export const getAllProductsPublic = createServerFn({ method: "GET" }).handler(async () => {
   const sb = anonClient();
-  const { data } = await sb.from("products").select("*").eq("is_visible", true).order("sort_order");
-  return data ?? [];
+  // Single request: products + visible badges nested. RLS filters to visible only.
+  const { data } = await (sb as any)
+    .from("products")
+    .select("*, product_badges(*)")
+    .eq("is_visible", true)
+    .order("sort_order");
+  const rows = (data ?? []) as Array<any>;
+  const map = await signMediaValues(sb, rows.map((r) => r.image));
+  return rows.map((r) => {
+    const badges = ((r.product_badges ?? []) as Array<any>)
+      .filter((b) => b.is_visible !== false)
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    return { ...r, image: resolveOne(r.image, map), badges };
+  });
 });
 
 export const getProductBySlug = createServerFn({ method: "GET" })
   .inputValidator((d: { slug: string }) => z.object({ slug: z.string().min(1).max(120) }).parse(d))
   .handler(async ({ data }) => {
     const sb = anonClient();
-    const { data: product } = await sb.from("products").select("*").eq("slug", data.slug).eq("is_visible", true).maybeSingle();
+    const { data: product } = await (sb as any)
+      .from("products")
+      .select("*, product_badges(*)")
+      .eq("slug", data.slug)
+      .eq("is_visible", true)
+      .maybeSingle();
     if (!product) return null;
     const { data: images } = await sb.from("product_images").select("*").eq("product_id", product.id).order("sort_order");
-    return { ...product, images: images ?? [] };
+    const values = [product.image, ...((images ?? []).map((i: any) => i.url))];
+    const map = await signMediaValues(sb, values);
+    const badges = ((product.product_badges ?? []) as Array<any>)
+      .filter((b) => b.is_visible !== false)
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    return {
+      ...product,
+      image: resolveOne(product.image, map),
+      badges,
+      images: (images ?? []).map((i: any) => ({ ...i, url: resolveOne(i.url, map) ?? i.url })),
+    };
   });
 
 export const getAbout = createServerFn({ method: "GET" }).handler(async () => {
@@ -71,11 +127,9 @@ export const getTeam = createServerFn({ method: "GET" }).handler(async () => {
 export const getDoctors = createServerFn({ method: "GET" }).handler(async () => {
   const sb = anonClient();
   const { data } = await (sb as any).from("doctors").select("*").eq("is_visible", true).order("sort_order");
-  return (data ?? []) as Array<{
-    id: string; name: string; specialty: string | null; description: string | null;
-    qualifications: string | null; experience: string | null; photo_url: string | null;
-    phone: string | null; whatsapp: string | null; is_available: boolean; sort_order: number;
-  }>;
+  const rows = (data ?? []) as Array<any>;
+  const map = await signMediaValues(sb, rows.map((r) => r.photo_url));
+  return rows.map((r) => ({ ...r, photo_url: resolveOne(r.photo_url, map) }));
 });
 
 export const getTestimonials = createServerFn({ method: "GET" }).handler(async () => {
