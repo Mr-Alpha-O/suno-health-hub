@@ -37,6 +37,7 @@ import { Route as AuthenticatedAdminLogsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminJobsRouteImport } from './routes/_authenticated/admin.jobs'
 import { Route as AuthenticatedAdminHomepageRouteImport } from './routes/_authenticated/admin.homepage'
 import { Route as AuthenticatedAdminHeroRouteImport } from './routes/_authenticated/admin.hero'
+import { Route as AuthenticatedAdminFeedbackRouteImport } from './routes/_authenticated/admin.feedback'
 import { Route as AuthenticatedAdminFaqsRouteImport } from './routes/_authenticated/admin.faqs'
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin.doctors'
 import { Route as AuthenticatedAdminContactRouteImport } from './routes/_authenticated/admin.contact'
@@ -188,6 +189,12 @@ const AuthenticatedAdminHeroRoute = AuthenticatedAdminHeroRouteImport.update({
   path: '/hero',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminFeedbackRoute =
+  AuthenticatedAdminFeedbackRouteImport.update({
+    id: '/feedback',
+    path: '/feedback',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminFaqsRoute = AuthenticatedAdminFaqsRouteImport.update({
   id: '/faqs',
   path: '/faqs',
@@ -234,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/admin/contact': typeof AuthenticatedAdminContactRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/faqs': typeof AuthenticatedAdminFaqsRoute
+  '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/admin/hero': typeof AuthenticatedAdminHeroRoute
   '/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/admin/jobs': typeof AuthenticatedAdminJobsRoute
@@ -267,6 +275,7 @@ export interface FileRoutesByTo {
   '/admin/contact': typeof AuthenticatedAdminContactRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/faqs': typeof AuthenticatedAdminFaqsRoute
+  '/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/admin/hero': typeof AuthenticatedAdminHeroRoute
   '/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/admin/jobs': typeof AuthenticatedAdminJobsRoute
@@ -303,6 +312,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/contact': typeof AuthenticatedAdminContactRoute
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/_authenticated/admin/faqs': typeof AuthenticatedAdminFaqsRoute
+  '/_authenticated/admin/feedback': typeof AuthenticatedAdminFeedbackRoute
   '/_authenticated/admin/hero': typeof AuthenticatedAdminHeroRoute
   '/_authenticated/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/_authenticated/admin/jobs': typeof AuthenticatedAdminJobsRoute
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/admin/contact'
     | '/admin/doctors'
     | '/admin/faqs'
+    | '/admin/feedback'
     | '/admin/hero'
     | '/admin/homepage'
     | '/admin/jobs'
@@ -372,6 +383,7 @@ export interface FileRouteTypes {
     | '/admin/contact'
     | '/admin/doctors'
     | '/admin/faqs'
+    | '/admin/feedback'
     | '/admin/hero'
     | '/admin/homepage'
     | '/admin/jobs'
@@ -407,6 +419,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/contact'
     | '/_authenticated/admin/doctors'
     | '/_authenticated/admin/faqs'
+    | '/_authenticated/admin/feedback'
     | '/_authenticated/admin/hero'
     | '/_authenticated/admin/homepage'
     | '/_authenticated/admin/jobs'
@@ -636,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminHeroRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/feedback': {
+      id: '/_authenticated/admin/feedback'
+      path: '/feedback'
+      fullPath: '/admin/feedback'
+      preLoaderRoute: typeof AuthenticatedAdminFeedbackRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/faqs': {
       id: '/_authenticated/admin/faqs'
       path: '/faqs'
@@ -680,6 +700,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminContactRoute: typeof AuthenticatedAdminContactRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
   AuthenticatedAdminFaqsRoute: typeof AuthenticatedAdminFaqsRoute
+  AuthenticatedAdminFeedbackRoute: typeof AuthenticatedAdminFeedbackRoute
   AuthenticatedAdminHeroRoute: typeof AuthenticatedAdminHeroRoute
   AuthenticatedAdminHomepageRoute: typeof AuthenticatedAdminHomepageRoute
   AuthenticatedAdminJobsRoute: typeof AuthenticatedAdminJobsRoute
@@ -704,6 +725,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminContactRoute: AuthenticatedAdminContactRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
   AuthenticatedAdminFaqsRoute: AuthenticatedAdminFaqsRoute,
+  AuthenticatedAdminFeedbackRoute: AuthenticatedAdminFeedbackRoute,
   AuthenticatedAdminHeroRoute: AuthenticatedAdminHeroRoute,
   AuthenticatedAdminHomepageRoute: AuthenticatedAdminHomepageRoute,
   AuthenticatedAdminJobsRoute: AuthenticatedAdminJobsRoute,
