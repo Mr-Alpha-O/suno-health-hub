@@ -214,7 +214,17 @@ function ImagesGallery({ productId }: { productId: string }) {
   const [uploading, setUploading] = useState(false);
 
   async function load() {
-    try { setRows((await list({ data: { product_id: productId } })) as any); } catch (e: any) { toast.error(e.message); }
+    try {
+      const rowsRaw = (await list({ data: { product_id: productId } })) as any[];
+      // Sign paths for preview; keep original url (path) intact
+      const paths = rowsRaw.map((r) => r.url).filter((u) => u && !/^https?:\/\//i.test(u));
+      let map: Record<string, string> = {};
+      if (paths.length > 0) {
+        const { data: signed } = await supabase.storage.from("media").createSignedUrls(paths, 60 * 60);
+        for (const s of signed ?? []) if (s.path && s.signedUrl) map[s.path] = s.signedUrl;
+      }
+      setRows(rowsRaw.map((r) => ({ ...r, _preview: /^https?:\/\//i.test(r.url) ? r.url : (map[r.url] ?? r.url) })));
+    } catch (e: any) { toast.error(e.message); }
   }
   useEffect(() => { load(); }, [productId]);
 
@@ -230,8 +240,8 @@ function ImagesGallery({ productId }: { productId: string }) {
         const path = `products/${productId}/${Date.now()}-${f.name.replace(/[^\w.\-]+/g, "_")}.${ext}`;
         const { error } = await supabase.storage.from("media").upload(path, main, { contentType: mime });
         if (error) throw error;
-        const { data: signed } = await supabase.storage.from("media").createSignedUrl(path, 60 * 60 * 24 * 365);
-        await add({ data: { product_id: productId, url: signed?.signedUrl ?? path, alt: f.name, sort_order: sort++ } });
+        // Store the storage path (not a signed URL). URLs are signed on-demand on read.
+        await add({ data: { product_id: productId, url: path, alt: f.name, sort_order: sort++ } });
       }
       toast.success("تم إضافة الصور");
       load();
