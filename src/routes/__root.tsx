@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { FloatingButtons } from "@/components/FloatingButtons";
+import { FeedbackWidget } from "@/components/FeedbackWidget";
 import { Toaster } from "sonner";
 import { site } from "@/lib/site";
 
