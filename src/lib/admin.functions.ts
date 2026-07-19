@@ -159,9 +159,17 @@ function slugifyName(name: string): string {
 export const listProducts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.from("products").select("*").order("sort_order");
+    const { data, error } = await (context.supabase as any)
+      .from("products")
+      .select("*, product_badges(*)")
+      .order("sort_order");
     if (error) throw new Error(error.message);
-    return data;
+    return (data ?? []).map((r: any) => ({
+      ...r,
+      badges: ((r.product_badges ?? []) as Array<any>).sort(
+        (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+      ),
+    }));
   });
 
 export const upsertProduct = createServerFn({ method: "POST" })

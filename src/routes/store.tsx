@@ -6,6 +6,7 @@ import { site } from "@/lib/site";
 import { productsQO, contactQO } from "@/lib/public-queries";
 import { productImage, waLinkFor } from "@/lib/media";
 import { useFavorites } from "@/lib/favorites";
+import { ProductBadgeList } from "@/components/ProductBadge";
 
 export const Route = createFileRoute("/store")({
   head: () => ({
@@ -179,9 +180,7 @@ function StorePage() {
             const unitLabel: Record<string, string> = { hour: "ساعة", day: "يوم", week: "أسبوع", month: "شهر", year: "سنة", negotiable: "" };
             const rentSuffix = rentalUnit === "negotiable" || !unitLabel[rentalUnit] ? "" : ` / ${unitLabel[rentalUnit]}`;
             const isFav = fav.has(p.id as string);
-            const saleOnly = forSale && !forRent;
-            const rentOnly = forRent && !forSale;
-            const isNegotiable = rentalUnit === "negotiable";
+            const badges = ((p as any).badges ?? []) as Array<any>;
             return (
               <div key={p.id ?? slug} className="group bg-white rounded-2xl border border-border shadow-soft hover:shadow-elegant overflow-hidden transition-smooth hover:-translate-y-1 relative flex flex-col">
                 <button
@@ -198,11 +197,9 @@ function StorePage() {
                   {p.category && <div className="text-xs text-primary font-bold mb-1">{p.category}</div>}
                   <Link to="/store/$slug" params={{ slug: p.slug }} className="font-extrabold text-lg hover:text-primary transition-smooth line-clamp-1">{p.name}</Link>
                   {p.short && <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-6">{p.short}</p>}
-                  {(saleOnly || rentOnly || isNegotiable) && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {saleOnly && <CardBadge tone="emerald">للبيع فقط</CardBadge>}
-                      {rentOnly && <CardBadge tone="sky">للإيجار فقط</CardBadge>}
-                      {isNegotiable && <CardBadge tone="amber">قابل للتفاوض</CardBadge>}
+                  {badges.length > 0 && (
+                    <div className="mt-3">
+                      <ProductBadgeList badges={badges} size="sm" />
                     </div>
                   )}
                   {(forSale || forRent) && (
@@ -251,17 +248,5 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
   );
 }
 
-function CardBadge({ tone, children }: { tone: "emerald" | "sky" | "amber"; children: React.ReactNode }) {
-  const styles: Record<string, string> = {
-    emerald: "bg-emerald-100 text-emerald-800 ring-emerald-200",
-    sky: "bg-sky-100 text-sky-800 ring-sky-200",
-    amber: "bg-amber-100 text-amber-800 ring-amber-200",
-  };
-  const dot: Record<string, string> = { emerald: "bg-emerald-500", sky: "bg-sky-500", amber: "bg-amber-500" };
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ${styles[tone]}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${dot[tone]}`} />
-      {children}
-    </span>
-  );
-}
+
+

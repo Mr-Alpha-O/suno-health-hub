@@ -93,7 +93,7 @@ function MediaPage() {
                 <div className="p-2 space-y-1">
                   <div className="text-xs truncate" title={f.name}>{f.name}</div>
                   <div className="flex gap-1">
-                    <button onClick={() => { navigator.clipboard.writeText(f.url ?? ""); toast.success("تم النسخ"); }} className="flex-1 inline-flex items-center justify-center gap-1 text-xs bg-muted rounded p-1.5"><Copy className="h-3 w-3" /> نسخ</button>
+                    <button onClick={() => { navigator.clipboard.writeText(f.name); toast.success("تم نسخ المسار"); }} className="flex-1 inline-flex items-center justify-center gap-1 text-xs bg-muted rounded p-1.5"><Copy className="h-3 w-3" /> نسخ المسار</button>
                     <button onClick={() => remove(f.name)} className="text-destructive rounded p-1.5 hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 </div>

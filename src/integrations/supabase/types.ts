@@ -599,6 +599,47 @@ export type Database = {
         }
         Relationships: []
       }
+      product_badges: {
+        Row: {
+          color_variant: string
+          created_at: string
+          id: string
+          is_visible: boolean
+          product_id: string
+          sort_order: number
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          color_variant?: string
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          product_id: string
+          sort_order?: number
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          color_variant?: string
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          product_id?: string
+          sort_order?: number
+          text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_badges_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_images: {
         Row: {
           alt: string | null
@@ -969,6 +1010,45 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      visitor_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          device_type: string | null
+          id: string
+          is_reviewed: boolean
+          name: string | null
+          page_url: string | null
+          rating: number | null
+          requested_product: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          is_reviewed?: boolean
+          name?: string | null
+          page_url?: string | null
+          rating?: number | null
+          requested_product?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          is_reviewed?: boolean
+          name?: string | null
+          page_url?: string | null
+          rating?: number | null
+          requested_product?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }

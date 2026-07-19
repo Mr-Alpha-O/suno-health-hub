@@ -7,6 +7,7 @@ import { productBySlugQO, contactQO, productsQO } from "@/lib/public-queries";
 import { productImage, waLinkFor } from "@/lib/media";
 import { Lightbox } from "@/components/Lightbox";
 import { useFavorites } from "@/lib/favorites";
+import { ProductBadgeList } from "@/components/ProductBadge";
 
 export const Route = createFileRoute("/store/$slug")({
   head: ({ params }) => ({
@@ -98,9 +99,8 @@ function ProductPage() {
     ...others.filter((x) => !x.category || x.category !== p.category),
   ].slice(0, 4);
 
-  const saleOnly = forSale && !forRent;
-  const rentOnly = forRent && !forSale;
-  const isNegotiable = rentalUnit === "negotiable";
+
+
 
   return (
     <section className="container mx-auto px-4 py-12">
@@ -142,11 +142,9 @@ function ProductPage() {
             <div>
               {p.category && <div className="text-sm text-primary font-bold">{p.category}</div>}
               <h1 className="mt-2 text-3xl md:text-4xl font-extrabold">{p.name}</h1>
-              {(saleOnly || rentOnly || isNegotiable) && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {saleOnly && <StatusBadge tone="emerald">للبيع فقط</StatusBadge>}
-                  {rentOnly && <StatusBadge tone="sky">للإيجار فقط</StatusBadge>}
-                  {isNegotiable && <StatusBadge tone="amber">قابل للتفاوض</StatusBadge>}
+              {((p as any).badges?.length ?? 0) > 0 && (
+                <div className="mt-3">
+                  <ProductBadgeList badges={(p as any).badges} />
                 </div>
               )}
             </div>
@@ -274,21 +272,5 @@ function ProductPage() {
   );
 }
 
-function StatusBadge({ tone, children }: { tone: "emerald" | "sky" | "amber"; children: React.ReactNode }) {
-  const styles: Record<string, string> = {
-    emerald: "bg-emerald-100 text-emerald-800 ring-emerald-200",
-    sky: "bg-sky-100 text-sky-800 ring-sky-200",
-    amber: "bg-amber-100 text-amber-800 ring-amber-200",
-  };
-  const dot: Record<string, string> = {
-    emerald: "bg-emerald-500",
-    sky: "bg-sky-500",
-    amber: "bg-amber-500",
-  };
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold ring-1 ${styles[tone]}`}>
-      <span className={`h-2 w-2 rounded-full ${dot[tone]}`} />
-      {children}
-    </span>
-  );
-}
+
+

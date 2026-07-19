@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { FloatingButtons } from "@/components/FloatingButtons";
+import { FeedbackWidget } from "@/components/FeedbackWidget";
 import { Toaster } from "sonner";
 import { site } from "@/lib/site";
 
@@ -113,6 +114,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const pathname = router.state.location.pathname;
+  const isAdmin = pathname.startsWith("/admin") || pathname === "/auth";
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-screen flex-col">
@@ -123,6 +127,7 @@ function RootComponent() {
         <Footer />
       </div>
       <FloatingButtons />
+      {!isAdmin && <FeedbackWidget />}
       <Toaster position="top-center" richColors closeButton dir="rtl" />
     </QueryClientProvider>
   );

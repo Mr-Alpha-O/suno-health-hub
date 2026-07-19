@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { listProducts, upsertProduct, deleteProduct } from "@/lib/admin.functions";
 import { listProductImages, addProductImage, deleteProductImage, reorderProductImages } from "@/lib/doctors-sections.functions";
+import { listProductBadges, upsertProductBadge, deleteProductBadge, BADGE_COLORS } from "@/lib/badges.functions";
 import { compressImage } from "@/lib/image-compress";
 import { toast } from "sonner";
 import { Trash2, Plus, Save, Upload, ArrowUp, ArrowDown } from "lucide-react";
@@ -130,8 +131,78 @@ function ProductRow({ product, onSave, onRemove }: any) {
       </div>
 
       {product.id && <ImagesGallery productId={product.id} />}
+      {product.id && <BadgesEditor productId={product.id} />}
     </div>
   );
+}
+
+function BadgesEditor({ productId }: { productId: string }) {
+  const list = useServerFn(listProductBadges);
+  const up = useServerFn(upsertProductBadge);
+  const del = useServerFn(deleteProductBadge);
+  const [rows, setRows] = useState<any[]>([]);
+  const [draft, setDraft] = useState<{ text: string; color_variant: string }>({ text: "", color_variant: "green" });
+
+  async function load() {
+    try { setRows((await list({ data: { product_id: productId } })) as any); } catch (e: any) { toast.error(e.message); }
+  }
+  useEffect(() => { load(); }, [productId]);
+
+  async function addBadge() {
+    const text = draft.text.trim();
+    if (!text) return;
+    try {
+      await up({ data: { product_id: productId, text, color_variant: draft.color_variant as any, sort_order: rows.length, is_visible: true } });
+      setDraft({ text: "", color_variant: "green" });
+      load();
+    } catch (e: any) { toast.error(e.message); }
+  }
+  async function toggleVisible(b: any) {
+    try { await up({ data: { id: b.id, product_id: productId, text: b.text, color_variant: b.color_variant, sort_order: b.sort_order ?? 0, is_visible: !b.is_visible } }); load(); }
+    catch (e: any) { toast.error(e.message); }
+  }
+  async function remove(id: string) {
+    if (!confirm("حذف الشارة؟")) return;
+    try { await del({ data: { id } }); load(); } catch (e: any) { toast.error(e.message); }
+  }
+
+  return (
+    <div className="border-t pt-3 mt-2">
+      <div className="text-xs font-bold text-muted-foreground mb-2">شارات المنتج ({rows.length})</div>
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {rows.map((b) => (
+          <span key={b.id} className={`inline-flex items-center gap-1.5 rounded-full ring-1 px-2.5 py-0.5 text-[11px] font-bold ${b.is_visible === false ? "opacity-40" : ""} ${colorClass(b.color_variant)}`}>
+            {b.text}
+            <button onClick={() => toggleVisible(b)} title={b.is_visible === false ? "إظهار" : "إخفاء"} className="opacity-60 hover:opacity-100">{b.is_visible === false ? "👁️" : "🚫"}</button>
+            <button onClick={() => remove(b.id)} className="text-red-600 opacity-70 hover:opacity-100">✕</button>
+          </span>
+        ))}
+        {rows.length === 0 && <span className="text-xs text-muted-foreground">لا توجد شارات — أضف شارة أدناه.</span>}
+      </div>
+      <div className="flex flex-wrap gap-2 items-center">
+        <input value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })} placeholder="نص الشارة (مثال: خصم 20%)" maxLength={50} className="rounded-md border px-2 py-1.5 text-sm flex-1 min-w-[180px]" />
+        <select value={draft.color_variant} onChange={(e) => setDraft({ ...draft, color_variant: e.target.value })} className="rounded-md border px-2 py-1.5 text-sm">
+          {BADGE_COLORS.map((c) => <option key={c} value={c}>{colorLabel(c)}</option>)}
+        </select>
+        <button onClick={addBadge} className="inline-flex items-center gap-1 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-xs font-bold"><Plus className="h-3 w-3" /> إضافة</button>
+      </div>
+    </div>
+  );
+}
+
+function colorLabel(c: string) {
+  return ({ green: "أخضر", blue: "أزرق", orange: "برتقالي", purple: "بنفسجي", red: "أحمر", gray: "رمادي", gold: "ذهبي" } as any)[c] ?? c;
+}
+function colorClass(c: string) {
+  return ({
+    green: "bg-emerald-100 text-emerald-800 ring-emerald-200",
+    blue: "bg-sky-100 text-sky-800 ring-sky-200",
+    orange: "bg-amber-100 text-amber-800 ring-amber-200",
+    purple: "bg-violet-100 text-violet-800 ring-violet-200",
+    red: "bg-rose-100 text-rose-800 ring-rose-200",
+    gray: "bg-slate-100 text-slate-700 ring-slate-200",
+    gold: "bg-yellow-100 text-yellow-800 ring-yellow-200",
+  } as any)[c] ?? "bg-slate-100 text-slate-700 ring-slate-200";
 }
 
 function ImagesGallery({ productId }: { productId: string }) {
@@ -143,7 +214,17 @@ function ImagesGallery({ productId }: { productId: string }) {
   const [uploading, setUploading] = useState(false);
 
   async function load() {
-    try { setRows((await list({ data: { product_id: productId } })) as any); } catch (e: any) { toast.error(e.message); }
+    try {
+      const rowsRaw = (await list({ data: { product_id: productId } })) as any[];
+      // Sign paths for preview; keep original url (path) intact
+      const paths = rowsRaw.map((r) => r.url).filter((u) => u && !/^https?:\/\//i.test(u));
+      let map: Record<string, string> = {};
+      if (paths.length > 0) {
+        const { data: signed } = await supabase.storage.from("media").createSignedUrls(paths, 60 * 60);
+        for (const s of signed ?? []) if (s.path && s.signedUrl) map[s.path] = s.signedUrl;
+      }
+      setRows(rowsRaw.map((r) => ({ ...r, _preview: /^https?:\/\//i.test(r.url) ? r.url : (map[r.url] ?? r.url) })));
+    } catch (e: any) { toast.error(e.message); }
   }
   useEffect(() => { load(); }, [productId]);
 
@@ -159,8 +240,8 @@ function ImagesGallery({ productId }: { productId: string }) {
         const path = `products/${productId}/${Date.now()}-${f.name.replace(/[^\w.\-]+/g, "_")}.${ext}`;
         const { error } = await supabase.storage.from("media").upload(path, main, { contentType: mime });
         if (error) throw error;
-        const { data: signed } = await supabase.storage.from("media").createSignedUrl(path, 60 * 60 * 24 * 365);
-        await add({ data: { product_id: productId, url: signed?.signedUrl ?? path, alt: f.name, sort_order: sort++ } });
+        // Store the storage path (not a signed URL). URLs are signed on-demand on read.
+        await add({ data: { product_id: productId, url: path, alt: f.name, sort_order: sort++ } });
       }
       toast.success("تم إضافة الصور");
       load();
@@ -198,7 +279,7 @@ function ImagesGallery({ productId }: { productId: string }) {
         <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
           {rows.map((r, i) => (
             <div key={r.id} className="relative group border rounded overflow-hidden">
-              <img src={r.url} alt={r.alt ?? ""} className="w-full aspect-square object-cover" />
+              <img src={r._preview ?? r.url} alt={r.alt ?? ""} className="w-full aspect-square object-cover" />
               <div className="absolute inset-x-0 bottom-0 flex justify-between p-1 bg-black/50 opacity-0 group-hover:opacity-100 transition">
                 <button onClick={() => move(i, -1)} className="text-white p-0.5"><ArrowUp className="h-3 w-3" /></button>
                 <button onClick={() => move(i, 1)} className="text-white p-0.5"><ArrowDown className="h-3 w-3" /></button>
