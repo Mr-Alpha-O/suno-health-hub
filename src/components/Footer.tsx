@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 import { navQO, contactQO, contactCollectionsQO } from "@/lib/public-queries";
 import { waLinkFor } from "@/lib/media";
 
-export function Footer() {
+export function Footer({ hideCredit = false }: { hideCredit?: boolean } = {}) {
   const { data: navItems } = useQuery(navQO);
   const { data: contact } = useQuery(contactQO);
   const { data: coll } = useQuery(contactCollectionsQO);
