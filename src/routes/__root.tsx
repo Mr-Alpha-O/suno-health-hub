@@ -14,7 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { FloatingButtons } from "@/components/FloatingButtons";
-import { FeedbackWidget } from "@/components/FeedbackWidget";
+import { FeedbackSection } from "@/components/FeedbackSection";
 import { Toaster } from "sonner";
 import { site } from "@/lib/site";
 
@@ -124,10 +124,10 @@ function RootComponent() {
         <main className="flex-1">
           <Outlet />
         </main>
-        <Footer />
+        {!isAdmin && <FeedbackSection />}
+        <Footer hideCredit={isAdmin} />
       </div>
       <FloatingButtons />
-      {!isAdmin && <FeedbackWidget />}
       <Toaster position="top-center" richColors closeButton dir="rtl" />
     </QueryClientProvider>
   );

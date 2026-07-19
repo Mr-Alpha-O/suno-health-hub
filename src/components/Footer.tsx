@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 import { navQO, contactQO, contactCollectionsQO } from "@/lib/public-queries";
 import { waLinkFor } from "@/lib/media";
 
-export function Footer() {
+export function Footer({ hideCredit = false }: { hideCredit?: boolean } = {}) {
   const { data: navItems } = useQuery(navQO);
   const { data: contact } = useQuery(contactQO);
   const { data: coll } = useQuery(contactCollectionsQO);
@@ -82,8 +82,19 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-border">
-        <div className="container mx-auto px-4 py-5 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} {site.nameAr}. جميع الحقوق محفوظة.
+        <div className="container mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2 text-center text-xs text-muted-foreground">
+          <span>© {new Date().getFullYear()} {site.nameAr}. جميع الحقوق محفوظة.</span>
+          {!hideCredit && (
+            <a
+              href={`https://wa.me/201064904953?text=${encodeURIComponent("مرحبًا، رأيت موقع شركة سونو للخدمات الطبية وأرغب في الاستفسار عن إنشاء موقع أو نظام مشابه.")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="opacity-70 hover:opacity-100 hover:text-primary transition-smooth"
+              aria-label="Powered by Alpha.World.System — تواصل عبر واتساب"
+            >
+              Powered by <span className="font-semibold">Alpha.World.System</span>
+            </a>
+          )}
         </div>
       </div>
     </footer>
