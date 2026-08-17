@@ -6,8 +6,9 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { site } from "@/lib/site";
 import {
   heroQO, whyUsQO, serviceCategoriesQO, contactQO,
-  doctorsQO, testimonialsQO, faqsQO, siteStatsQO, sectionsQO,
+  doctorsQO, testimonialsQO, faqsQO, siteStatsQO, sectionsQO, reviewsQO,
 } from "@/lib/public-queries";
+import { ReviewsSection } from "@/components/ReviewsSection";
 import { heroImageFallback, ambulanceImage, equipmentImage, waLinkFor } from "@/lib/media";
 
 export const Route = createFileRoute("/")({
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/")({
       context.queryClient.ensureQueryData(testimonialsQO),
       context.queryClient.ensureQueryData(faqsQO),
       context.queryClient.ensureQueryData(siteStatsQO),
+      context.queryClient.ensureQueryData(reviewsQO),
     ]);
   },
   component: Index,
@@ -60,6 +62,7 @@ function Index() {
   const { data: testimonials } = useSuspenseQuery(testimonialsQO);
   const { data: faqs } = useSuspenseQuery(faqsQO);
   const { data: stats } = useSuspenseQuery(siteStatsQO);
+  const { data: reviews } = useSuspenseQuery(reviewsQO);
 
   const phone = contact?.phone ?? site.phone;
   const phoneIntl = contact?.phone_intl ?? site.phoneIntl;
@@ -273,6 +276,8 @@ function Index() {
       </section>
     ),
 
+    reviews: () => <ReviewsSection reviews={reviews} />,
+
     faqs: () => faqs.length === 0 ? null : (
       <section className="container mx-auto px-4 py-20">
         <SectionHeading eyebrow="أسئلة شائعة" title="أجوبة سريعة عن أهم استفساراتك" desc="" />
@@ -313,7 +318,7 @@ function Index() {
     ),
   };
 
-  const defaultKeys = ["hero","services","why_us","ambulance","store","doctors","stats","testimonials","faqs","contact"];
+  const defaultKeys = ["hero","services","why_us","ambulance","store","doctors","stats","reviews","testimonials","faqs","contact"];
   const configured = (sections ?? []).length > 0
     ? sections.filter((s) => s.is_visible).map((s) => s.key)
     : defaultKeys;
