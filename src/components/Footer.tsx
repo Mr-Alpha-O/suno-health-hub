@@ -93,7 +93,7 @@ export function Footer({ hideCredit = false }: { hideCredit?: boolean } = {}) {
               aria-label="صنع بواسطة Alpha.World.System — تواصل عبر واتساب"
             >
               صنع بواسطة{" "}
-              <span className="font-extrabold text-primary underline-offset-4 group-hover:underline group-hover:drop-shadow-[0_0_8px_hsl(var(--primary)/0.45)] transition-smooth" dir="ltr">
+              <span className="font-extrabold text-primary underline-offset-4 group-hover:underline group-hover:drop-shadow-[0_0_10px_var(--primary)] transition-smooth" dir="ltr">
                 Alpha.World.System
               </span>
             </a>
