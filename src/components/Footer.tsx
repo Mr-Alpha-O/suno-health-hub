@@ -89,12 +89,16 @@ export function Footer({ hideCredit = false }: { hideCredit?: boolean } = {}) {
               href={`https://wa.me/201064904953?text=${encodeURIComponent("مرحبًا، رأيت موقع شركة سونو للخدمات الطبية وأرغب في الاستفسار عن إنشاء موقع أو نظام مشابه.")}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="opacity-70 hover:opacity-100 hover:text-primary transition-smooth"
-              aria-label="Powered by Alpha.World.System — تواصل عبر واتساب"
+              className="group text-sm md:text-base text-primary/80 hover:text-primary transition-smooth"
+              aria-label="صنع بواسطة Alpha.World.System — تواصل عبر واتساب"
             >
-              Powered by <span className="font-semibold">Alpha.World.System</span>
+              صنع بواسطة{" "}
+              <span className="font-extrabold text-primary underline-offset-4 group-hover:underline group-hover:drop-shadow-[0_0_8px_hsl(var(--primary)/0.45)] transition-smooth" dir="ltr">
+                Alpha.World.System
+              </span>
             </a>
           )}
+
         </div>
       </div>
     </footer>
