@@ -17,6 +17,7 @@ import {
   getNavItems,
   getHomepageSections,
   getSiteSettings,
+  getPublishedReviews,
 } from "./public.functions";
 
 export const heroQO = queryOptions({ queryKey: ["public", "hero"], queryFn: () => getHero() });
@@ -36,3 +37,4 @@ export const contactCollectionsQO = queryOptions({ queryKey: ["public", "contact
 export const navQO = queryOptions({ queryKey: ["public", "nav"], queryFn: () => getNavItems(), staleTime: 60_000 });
 export const sectionsQO = queryOptions({ queryKey: ["public", "sections"], queryFn: () => getHomepageSections(), staleTime: 60_000 });
 export const settingsQO = queryOptions({ queryKey: ["public", "settings"], queryFn: () => getSiteSettings(), staleTime: 60_000 });
+export const reviewsQO = queryOptions({ queryKey: ["public", "reviews"], queryFn: () => getPublishedReviews(), staleTime: 60_000 });

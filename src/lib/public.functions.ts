@@ -271,3 +271,16 @@ export const submitContactMessage = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// Public customer reviews: only admin-published feedback, minimal public fields.
+export const getPublishedReviews = createServerFn({ method: "GET" }).handler(async () => {
+  const sb = anonClient();
+  const { data, error } = await (sb as any)
+    .from("visitor_feedback")
+    .select("id,name,rating,comment,created_at")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false })
+    .limit(24);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as Array<{ id: string; name: string | null; rating: number | null; comment: string | null; created_at: string }>;
+});
