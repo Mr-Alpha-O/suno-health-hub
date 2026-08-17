@@ -1019,6 +1019,7 @@ export type Database = {
           created_at: string
           device_type: string | null
           id: string
+          is_published: boolean
           is_reviewed: boolean
           name: string | null
           page_url: string | null
@@ -1031,6 +1032,7 @@ export type Database = {
           created_at?: string
           device_type?: string | null
           id?: string
+          is_published?: boolean
           is_reviewed?: boolean
           name?: string | null
           page_url?: string | null
@@ -1043,6 +1045,7 @@ export type Database = {
           created_at?: string
           device_type?: string | null
           id?: string
+          is_published?: boolean
           is_reviewed?: boolean
           name?: string | null
           page_url?: string | null
