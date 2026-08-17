@@ -1,0 +1,1 @@
+INSERT INTO public.visitor_feedback (rating, name, comment, is_published, is_reviewed) VALUES (5, 'تجربة', 'مراجعة اختبار مؤقتة', true, true);
