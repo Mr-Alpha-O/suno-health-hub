@@ -1,0 +1,1 @@
+DELETE FROM public.visitor_feedback WHERE comment = 'مراجعة اختبار مؤقتة';
