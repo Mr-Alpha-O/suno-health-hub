@@ -55,6 +55,18 @@ export const markFeedbackReviewed = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setFeedbackPublished = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ id: z.string().uuid(), is_published: z.boolean() }))
+  .handler(async ({ data, context }) => {
+    const { error } = await (context.supabase as any)
+      .from("visitor_feedback")
+      .update({ is_published: data.is_published })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteFeedback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
